@@ -4,88 +4,465 @@ Description: 'Example microservice deploy'
 Parameters:
   ProjectName:
     Type: String
-    Description: 'Usually pn can be pnXYZ where XYZ are the feature number, useful to create
-      experimental environments without crash official development environment'
-
-  AlarmSNSTopicArn:
-    Type: String
-    Description: ARN of alarm topic
-
-  WebApiDnsName:
-    Type: String
-    Description: 'The DNS name used for WEB rest API.'
-  
-  CorsAllowedDomains:
-    Type: String
-    Description: 'Comma separated list of domains allowed to make cross origin request'
-
-  ContainerImageUri:
-    Type: String
-    Description: 'Exact container image URI with full repository and image digest'
-
-  MicroserviceNumber:
-    Type: Number
-    Description: 'Disambiguation useful for load balancer rules'
+    Description: 'Usually pn can be pnXYZ where XYZ are the feature number, useful to create experimental environments without crash official development environment'
 
   TemplateBucketBaseUrl:
     Type: String
     Description: 'The S3 bucket from which to fetch the templates used by this stack.'
 
-  ECSClusterName:
-    Type: String
-    Description: 'The name of the ECS cluster where the microservice is going to be deployed'
+  ActionEnqueuerManagerKinesisBatchSize:
+    Type: Number
+    Description: 'Batch size for Kinesis to Lambda action router'
+    Default: 10
 
-  SubnetsIds:
+  ActionEnqueuerManagerLambdaName:
     Type: String
-    Description: 'subnets ids comma separated list. Where to deploy the microservice'
 
-  VpcId:
+  ActionEnqueuerManagerDLQAlarmARN:
     Type: String
-    Description: 'VpcId where the microservice is going to be deployed'
-  
-  EcsDefaultSecurityGroup:
-    Type: String
-    Description: 'Default security group required by infrastructure'
+    Description: 'DLQ ARN for ActionEnqueuer Lambda'
 
-  ApplicationLoadBalancerListenerArn:
+  ActionEnqueuerManagerDLQARN:
     Type: String
-    Description: 'Load balancer listener where HTTP endpoints is going to be registered'
+    Description: 'DLQ ARN for ActionRouter Lambda'
 
-  ApplicationLoadBalancerDomain:
+  CdcPnFutureActionArn:
     Type: String
-    Description: 'Base URL of the load balancer where the service is going to be reachable'
+    Description: 'Kinesis stream for pn-futureAction'
 
-  NetworkLoadBalancerLink:
+  # OpenApi Bucket params
+  MicroserviceBucketName:
     Type: String
-    Description: 'network load balancer link for API-GW'
-  
-  LogsKinesisSourceStreamArn:
+    Default: ''
+    Description: 'Name of the bucket where the microservice files are copied during deploy'
+
+  ActionQueueMap:
     Type: String
-    Description: 'Kinesis stream that receive logs'
-  
-  Version:
+    Description: 'Define relation from actionType to sqs queue name'
+
+  QueueUrlMap:
     Type: String
-    Description: 'keep track of used projects commitIds'
+    Description: 'Define relation from queue name to sqs queue url'
+
+  ActionTimeoutErrorDLQURL:
+    Type: String
+    Description: 'DLQ URL for ActionRouter lambda'
+
+  ScheduledActionsQueueARN:
+    Type: String
+    Description: 'Send and pull ready-to-do actions th this queue'
+
+  ScheduledValidationActionsQueueARN:
+    Type: String
+    Description: 'Send and pull ready-to-do actions th this queue'
+
+  ActionTimeoutErrorDLQARN:
+    Type: String
+    Description: 'DLQ ARN for ActionRouter lambda'
+
+  FutureActionDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing'
+
+  ActionRemoverManagerLambdaName:
+    Type: String
+
+  LastPollForFutureActionDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing'
+
+  ActionRouterManagerKinesisBatchSize:
+    Type: Number
+    Description: "Batch size for kinesis to lambda action router"
+
+  CdcPnActionArn:
+    Type: String
+    Description: 'Kinesis stream for pn-action'
+
+  ActionRouterManagerDLQARN:
+    Type: String
+    Description: 'DLQ ARN for ActionRouter lambda'
+
+  ActionRouterManagerLambdaName:
+    Type: String
+
+  FutureActionTtlExtraDays:
+    Default: 365
+    Type: Number
+    Description: TTL in days days to add to the futureAction start date.
+
+  FutureActionDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing'
+
+  LastPollForFutureActionDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing'
 
 Resources:
-
-  # PN-TemplateBeMs microservice
-  TemplateBeMsMicroservice:
+  DeliveryPushMicroserviceCloudWatchDashboard:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-template-ms-be'
-        CpuValue: 512
-        MemoryAmount: 2GB
-        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
-        ContainerImageURI: !Sub '${ContainerImageUri}'
-        ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
-        MappedPaths: '/template-ms-be/*'
-        ECSClusterName: !Ref ECSClusterName
-        Subnets: !Ref SubnetsIds
-        VpcId: !Ref VpcId
-        EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
-        LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
-        LoadbalancerRulePriority: !Ref MicroserviceNumber
-        CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
+        DashboardName: !Sub "${ProjectName}-delivery-push"
+        DynamoDBTableNames: !Join
+          - ','
+          - - !Ref FutureActionDynamoTableName
+            - !Ref LastPollForFutureActionDynamoTableName
+        AlarmArns: !Join
+          - ','
+          - - !Ref ActionRouterManagerDLQARN
+            - !Ref ActionEnqueuerManagerDLQAlarmARN
+        QueueArns: !Join
+          - ','
+          - - !Ref ScheduledActionsQueueARN
+            - !Ref ScheduledValidationActionsQueueARN
+
+  # CDC To ActionEnqueuer
+  ActionEnqueuerManagerKinesisSource:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: !Ref ActionEnqueuerManagerKinesisBatchSize
+      BisectBatchOnFunctionError: true
+      EventSourceArn: !Ref CdcPnFutureActionArn
+      FunctionName: !GetAtt ActionEnqueuerManagerLambda.Outputs.FunctionName
+      DestinationConfig:
+        OnFailure:
+          Destination: !Ref ActionEnqueuerManagerDLQARN
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
+      FilterCriteria:
+        Filters:
+          - Pattern: '{"data": {"eventName": ["REMOVE"]}}'
+      MaximumBatchingWindowInSeconds: 300
+      MaximumRetryAttempts: 5
+      StartingPosition: TRIM_HORIZON
+
+  ActionEnqueuerManagerLambdaLibrariesLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - nodejs18.x
+      Content:
+        S3Bucket: !Ref MicroserviceBucketName
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer_libs.zip"
+      Description: NodeJs Libs layer
+      LayerName: actionEnqueuer-libs-layer
+
+  ActionEnqueuerManagerLambda:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/lambda.yaml"
+      Parameters:
+        FunctionName: !Ref ActionEnqueuerManagerLambdaName
+        Handler: "index.handler"
+        FunctionBucketName: !Ref MicroserviceBucketName
+        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer_code.zip"
+        MemorySize: 512
+        Timeout: 10
+        Runtime: nodejs18.x
+        TracingConfigMode: "Active"
+        RoleArn: !GetAtt ActionEnqueuerManagerLambdaRole.Arn
+        Layer1: !Ref ActionEnqueuerManagerLambdaLibrariesLayer
+        EnvVariables: !Sub [
+          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}",
+          {
+            actionQueueMap: !Ref ActionQueueMap,
+            QueueUrlMap: !Ref QueueUrlMap,
+            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
+          }
+        ]
+
+  # Lambda function role
+  ActionEnqueuerManagerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-actionEnqueuerLambdaRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # Lambda function IAM policy
+  ActionEnqueuerManagerLambdaPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-ActionEnqueuerLambdaPolicy
+      Roles:
+        - !Ref ActionEnqueuerManagerLambdaRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - kinesis:DescribeStream
+              - kinesis:DescribeStreamSummary
+              - kinesis:GetShardIterator
+              - kinesis:GetRecords
+              - kinesis:ListShards
+              - kinesis:ListStreams
+              - kinesis:SubscribeToShard
+            Resource: !Ref CdcPnFutureActionArn
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - sqs:SendMessage
+            Resource:
+              - !Ref ScheduledActionsQueueARN
+              - !Ref ScheduledValidationActionsQueueARN
+              - !Ref ActionEnqueuerManagerDLQARN
+              - !Ref ActionTimeoutErrorDLQARN
+          - Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:BatchWriteItem
+            Resource:
+              - !Ref FutureActionDynamoTableArn
+
+  ActionRemoverManagerLambdaLibrariesLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - nodejs18.x
+      Content:
+        S3Bucket: !Ref MicroserviceBucketName
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover_libs.zip"
+      Description: NodeJs Libs layer
+      LayerName: actionRemover-libs-layer
+
+  # Future Action Remover
+  ActionRemoverManagerLambda:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/lambda.yaml"
+      Parameters:
+        FunctionName: !Ref ActionRemoverManagerLambdaName
+        Handler: "index.handler"
+        FunctionBucketName: !Ref MicroserviceBucketName
+        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover_code.zip"
+        MemorySize: 512
+        Timeout: 10
+        Runtime: nodejs18.x
+        TracingConfigMode: "Active"
+        RoleArn: !GetAtt ActionRemoverManagerLambdaRole.Arn
+        Layer1: !Ref ActionRemoverManagerLambdaLibrariesLayer
+        EnvVariables: "LAST_WORKED_KEY=2"
+
+
+  # Lambda function role
+  ActionRemoverManagerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-actionRemoverLambdaRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # Lambda function IAM policy
+  ActionRemoverManagerLambdaPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-ActionRemoverLambdaPolicy
+      Roles:
+        - !Ref ActionRemoverManagerLambdaRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:DeleteItem"
+              - "dynamodb:BatchWriteItem"
+              - "dynamodb:Query"
+            Resource:
+              - !Ref FutureActionDynamoTableArn
+          - Effect: Allow
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:PutItem"
+            Resource:
+              - !Ref LastPollForFutureActionDynamoTableArn
+
+  # Action Remover scheduler BEGIN
+  ActionRemoverManagerSchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: scheduler.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: LambdScheduleExecutionPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt ActionRemoverManagerLambda.Outputs.FunctionArn
+  ActionRemoverManagerScheduler:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Description: "Schedule Action Remover every minute"
+      FlexibleTimeWindow:
+        Mode: "OFF"
+      Name: "ActionRemoverShedule"
+      ScheduleExpression: "rate(1 minutes)"
+      State: ENABLED
+      Target:
+        Arn: !GetAtt ActionRemoverManagerLambda.Outputs.FunctionArn
+        RoleArn: !GetAtt ActionRemoverManagerSchedulerRole.Arn
+  # Action Remover scheduler END
+
+  # CDC to Lambda action router
+  ActionRouterKinesisSource:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: !Ref ActionRouterManagerKinesisBatchSize
+      BisectBatchOnFunctionError: true
+      EventSourceArn: !Ref CdcPnActionArn
+      FunctionName: !GetAtt ActionRouterLambda.Outputs.FunctionName
+      DestinationConfig:
+        OnFailure:
+          Destination: !Ref ActionRouterManagerDLQARN
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
+      FilterCriteria:
+        { "Filters": [ { "Pattern": '{"data": {"eventName": ["INSERT"]}}' } ] }
+      MaximumBatchingWindowInSeconds: 300
+      MaximumRetryAttempts: 5
+      StartingPosition: TRIM_HORIZON
+
+
+  ActionRouterLambdaLibrariesLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - nodejs18.x
+      Content:
+        S3Bucket: !Ref MicroserviceBucketName
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router_libs.zip"
+      Description: NodeJs Libs layer
+      LayerName: actionRouterLambda-libs-layer
+
+  ActionRouterLambda:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/lambda.yaml"
+      Parameters:
+        FunctionName: !Ref ActionRouterManagerLambdaName
+        Handler: "index.handler"
+        FunctionBucketName: !Ref MicroserviceBucketName
+        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router_code.zip"
+        MemorySize: 512
+        Timeout: 10
+        Runtime: nodejs18.x
+        TracingConfigMode: "Active"
+        RoleArn: !GetAtt ActionRouterLambdaRole.Arn
+        Layer1: !Ref ActionRouterLambdaLibrariesLayer
+        EnvVariables:
+          !Sub [
+            "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}",
+            {
+              actionQueueMap: !Ref ActionQueueMap,
+              QueueUrlMap: !Ref QueueUrlMap,
+              FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
+              ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
+            },
+          ]
+
+  # Lambda function role
+  ActionRouterLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-actionRouterLambdaRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # Lambda function IAM policy
+  ActionRouterLambdaPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-ActionRouterLambdaPolicy
+      Roles:
+        - !Ref ActionRouterLambdaRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - kinesis:DescribeStream
+              - kinesis:DescribeStreamSummary
+              - kinesis:GetShardIterator
+              - kinesis:GetRecords
+              - kinesis:ListShards
+              - kinesis:ListStreams
+              - kinesis:SubscribeToShard
+            Resource: !Ref CdcPnActionArn
+          - Effect: "Allow"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - sqs:SendMessage
+            Resource:
+              - !Ref ScheduledActionsQueueARN
+              - !Ref ScheduledValidationActionsQueueARN
+              - !Ref ActionRouterManagerDLQARN
+              - !Ref ActionTimeoutErrorDLQARN
+          - Effect: Allow
+            Action:
+              - "dynamodb:PutItem"
+              - "dynamodb:BatchWriteItem"
+            Resource:
+              - !Ref FutureActionDynamoTableArn
