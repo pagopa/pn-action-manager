@@ -99,7 +99,192 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing'
 
+  # Instance parameters
+  # 256 (.25 vCPU) - Available memory values: 0.5GB, 1GB, 2GB
+  # 512 (.5 vCPU) - Available memory values: 1GB, 2GB, 3GB, 4GB
+  # 1024 (1 vCPU) - Available memory values: 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB
+  # 2048 (2 vCPU) - Available memory values: Between 4GB and 16GB in 1GB increments
+  # 4096 (4 vCPU) - Available memory values: Between 8GB and 30GB in 1GB increments
+  CpuValue:
+    Type: Number
+    Default: 1024
+    Description: Fargate virtual CPU quantity 1024 equals one vCPU
+
+  # 0.5GB, 1GB, 2GB - Available cpu values: 256 (.25 vCPU)
+  # 1GB, 2GB, 3GB, 4GB - Available cpu values: 512 (.5 vCPU)
+  # 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB - Available cpu values: 1024 (1 vCPU)
+  # Between 4GB and 16GB in 1GB increments - Available cpu values: 2048 (2 vCPU)
+  # Between 8GB and 30GB in 1GB increments - Available cpu values: 4096 (4 vCPU)
+  MemoryAmount:
+    Type: String
+    Default: 2GB
+    Description: memory amount reserved to the task pod.
+    AllowedValues: [ 2GB, 4GB, 6GB, 8GB ]
+
+  # Heath Check parameters
+  HealthCheckInterval:
+    Description: Seconds between two health check
+    Type: Number
+    Default: 60
+
+  HealthCheckTimeout:
+    Description: health check timeout seconds
+    Type: Number
+    Default: 5
+
+  HealthyThresholdCount:
+    Description: |
+      The number of consecutive health checks successes required before considering 
+      an unhealthy target healthy.
+    Type: Number
+    Default: 5
+
+  UnhealthyThresholdCount:
+    Description: |
+      The number of consecutive health check failures required before considering a target unhealthy.
+    Type: Number
+    Default: 2
+
+  AutoscalingThreshold:
+    Default: 70
+    Type: String
+
+  # Autoscaling parameters
+  AutoscalingCheckPeriod:
+    Default: 60
+    Type: Number
+    Description: minimum autoscaling number of tasks\
+
+  MinTasksNumber:
+    Default: 1
+    Type: Number
+    Description: minimum autoscaling number of tasks
+
+  MaxTasksNumber:
+    Default: 6
+    Type: Number
+    Description: maximum autoscaling number of tasks
+
+  AutoscalingDataPointN:
+    Default: 1
+    Type: Number
+    Description: activate when N datapoint on M
+
+  AutoscalingDataPointM:
+    Default: 1
+    Type: Number
+    Description: activate when N datapoint on M
+
+  AlarmSNSTopicArn:
+    Type: String
+    Description: 'ARN of alarm topic'
+
+  # EFS parameters
+  FargateEFSFileSystemID:
+    Type: String
+    Description: "EFS Filesystem"
+
+  MountEfs:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+
+  # Logging parameters
+  WireTapLogActivation:
+    Type: String
+    Default: false
+    Description: Activation of wire logs
+    AllowedValues:
+      - true
+      - false
+
+  ApplicativeEnvFileChecksum:
+    Type: String
+    Default: ''
+    Description: 'Applicative environment variable file checksum'
+
+  ECSClusterName:
+    Type: String
+    Description: 'The name of the ECS cluster where the microservice is going to be deployed'
+
+  SubnetsIds:
+    Type: CommaDelimitedList
+    Description: 'subnets ids comma separated list. Where to deploy the microservice'
+
+  VpcId:
+    Type: String
+    Description: 'VpcId where the microservice is going to be deployed'
+
+  EcsDefaultSecurityGroup:
+    Type: String
+    Description: 'Default security group required by infrastructure'
+
+  ApplicationLoadBalancerListenerArn:
+    Type: String
+    Description: 'Load balancer listener where HTTP endpoints is going to be registered'
+
+  MicroserviceNumber:
+    Type: Number
+    Description: 'Disambiguation useful for load balancer rules'
+
+  AlbSecurityGroup:
+    Type: String
+    Description: 'Application load balancer security group'
+
+  # Log group parameters
+  EcsLogGroup:
+    Type: String
+    Description: 'Ecs log group name'
+
+  LogAlarmStrategy:
+    Type: String
+    Default: 'FATAL'
+
+
 Resources:
+  # PN-TemplateBeMs microservice
+  ActionManagerMsMicroservice:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
+      Parameters:
+        MicroServiceUniqueName: !Sub '${ProjectName}-action-manager'
+        CpuValue: !Ref CpuValue
+        MemoryAmount: !Ref MemoryAmount
+        HealthCheckTimeout: !Ref HealthCheckTimeout
+        HealthCheckInterval: !Ref HealthCheckInterval
+        HealthyThresholdCount: !Ref HealthyThresholdCount
+        UnhealthyThresholdCount: !Ref UnhealthyThresholdCount
+        AutoscalingStrategy: REST-API
+        AutoscalingThreshold: !Ref AutoscalingThreshold
+        AutoscalingCheckPeriod: !Ref AutoscalingCheckPeriod
+        MinTasksNumber: !Ref MinTasksNumber
+        MaxTasksNumber: !Ref MaxTasksNumber
+        AutoscalingDataPointN: !Ref AutoscalingDataPointN
+        AutoscalingDataPointM: !Ref AutoscalingDataPointM
+        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
+        EfsFilesystem: !Ref FargateEFSFileSystemID
+        MountEfs: !Ref MountEfs
+        WireTapLogActivation: !Ref WireTapLogActivation
+        ContainerImageURI: !Sub '${ContainerImageUri}'
+        ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
+        ApplicativeEnvFileChecksum: !Ref ApplicativeEnvFileChecksum
+        #ContainerSecret1: !Sub 'PN_DELIVERYPUSH_ADDRESSMANAGERAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-DeliveryPush-Secrets:AddressManagerApiKey:AWSCURRENT:'
+        MicroServiceSecretPrefix: pn-ActionManager-Secrets
+        JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
+        MappedPaths: 'action-manager-private/*'
+        ECSClusterName: !Ref ECSClusterName
+        Subnets: !Join [ ',', !Ref SubnetsIds ]
+        VpcId: !Ref VpcId
+        EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
+        LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
+        LoadbalancerRulePriority: !Ref MicroserviceNumber
+        AlbSecurityGroup: !Ref AlbSecurityGroup
+        EcsLogGroup: !Ref EcsLogGroup
+        LogAlarmStrategyV1: !Ref LogAlarmStrategy
+
   DeliveryPushMicroserviceCloudWatchDashboard:
     Type: AWS::CloudFormation::Stack
     Properties:

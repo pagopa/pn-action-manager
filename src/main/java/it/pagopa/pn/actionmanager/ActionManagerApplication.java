@@ -1,4 +1,4 @@
-package it.pagopa.pn.template;
+package it.pagopa.pn.actionmanager;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-public class TemplateApplication {
+public class ActionManagerApplication {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(TemplateApplication.class, args);
+        SpringApplication.run(ActionManagerApplication.class, args);
     }
 
 
