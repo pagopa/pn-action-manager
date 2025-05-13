@@ -10,7 +10,7 @@ Parameters:
     Type: String
     Description: 'The S3 bucket from which to fetch the templates used by this stack.'
 
-  ActionEnqueuerManagerKinesisBatchSize:
+  ActionEnqueuerKinesisBatchSize:
     Type: Number
     Description: 'Batch size for Kinesis to Lambda action router'
     Default: 10
@@ -24,7 +24,7 @@ Parameters:
 
   ActionEnqueuerManagerDLQARN:
     Type: String
-    Description: 'DLQ ARN for ActionRouter Lambda'
+    Description: 'DLQ ARN for ActionEnqueuer Lambda'
 
   CdcPnFutureActionArn:
     Type: String
@@ -60,6 +60,10 @@ Parameters:
     Type: String
     Description: 'DLQ ARN for ActionRouter lambda'
 
+  ActionTimeoutErrorDLQAlarmARN:
+    Type: String
+    Description: 'DLQ ARN for ActionRouter lambda'
+
   FutureActionDynamoTableArn:
     Type: String
     Description: 'ARN of dynamodb table containing'
@@ -83,6 +87,10 @@ Parameters:
     Type: String
     Description: 'DLQ ARN for ActionRouter lambda'
 
+  ActionRouterManagerAlarmARN:
+    Type: String
+    Description: 'DLQ Alarm ARN for ActionRouter lambda'
+
   ActionRouterManagerLambdaName:
     Type: String
 
@@ -91,11 +99,11 @@ Parameters:
     Type: Number
     Description: TTL in days days to add to the futureAction start date.
 
-  FutureActionDynamoTableName:
+  ActionDynamoTableName:
     Type: String
     Description: 'Name of dynamodb table containing'
 
-  LastPollForFutureActionDynamoTableName:
+  FutureActionDynamoTableName:
     Type: String
     Description: 'Name of dynamodb table containing'
 
@@ -271,9 +279,6 @@ Resources:
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ApplicativeEnvFileChecksum: !Ref ApplicativeEnvFileChecksum
-        #ContainerSecret1: !Sub 'PN_DELIVERYPUSH_ADDRESSMANAGERAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-DeliveryPush-Secrets:AddressManagerApiKey:AWSCURRENT:'
-        MicroServiceSecretPrefix: pn-ActionManager-Secrets
-        JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: 'action-manager-private/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref SubnetsIds ]
@@ -285,20 +290,22 @@ Resources:
         EcsLogGroup: !Ref EcsLogGroup
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
 
-  DeliveryPushMicroserviceCloudWatchDashboard:
+  ActionManagerMicroserviceCloudWatchDashboard:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
       Parameters:
-        DashboardName: !Sub "${ProjectName}-delivery-push"
+        DashboardName: !Sub "${ProjectName}-action-manager"
         DynamoDBTableNames: !Join
           - ','
-          - - !Ref FutureActionDynamoTableName
-            - !Ref LastPollForFutureActionDynamoTableName
+          - - !Ref ActionDynamoTableName
+            - !Ref FutureActionDynamoTableName
         AlarmArns: !Join
           - ','
           - - !Ref ActionRouterManagerDLQARN
             - !Ref ActionEnqueuerManagerDLQAlarmARN
+            - !Ref ActionTimeoutErrorDLQAlarmARN
+            - !Ref ActionRouterManagerAlarmARN
         QueueArns: !Join
           - ','
           - - !Ref ScheduledActionsQueueARN
@@ -308,7 +315,7 @@ Resources:
   ActionEnqueuerManagerKinesisSource:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
-      BatchSize: !Ref ActionEnqueuerManagerKinesisBatchSize
+      BatchSize: !Ref ActionEnqueuerKinesisBatchSize
       BisectBatchOnFunctionError: true
       EventSourceArn: !Ref CdcPnFutureActionArn
       FunctionName: !GetAtt ActionEnqueuerManagerLambda.Outputs.FunctionName
