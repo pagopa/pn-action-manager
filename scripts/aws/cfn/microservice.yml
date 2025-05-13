@@ -179,8 +179,8 @@ Resources:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
         MicroServiceUniqueName: !Sub '${ProjectName}-action-manager'
-        CpuValue: 512
-        MemoryAmount: 2GB
+        CpuValue: !Ref CpuValue
+        MemoryAmount: !Ref MemoryAmount
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
@@ -244,7 +244,7 @@ Resources:
         - nodejs18.x
       Content:
         S3Bucket: !Ref MicroserviceBucketName
-        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer_libs.zip"
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_libs.zip"
       Description: NodeJs Libs layer
       LayerName: actionEnqueuer-libs-layer
 
@@ -258,7 +258,7 @@ Resources:
         FunctionName: !Ref ActionEnqueuerManagerLambdaName
         Handler: "index.handler"
         FunctionBucketName: !Ref MicroserviceBucketName
-        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer_code.zip"
+        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_code.zip"
         MemorySize: 512
         Timeout: 10
         Runtime: nodejs18.x
@@ -295,7 +295,7 @@ Resources:
   ActionEnqueuerManagerLambdaPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ${ProjectName}-ActionEnqueuerLambdaPolicy
+      PolicyName: !Sub ${ProjectName}-ActionEnqueuerManagerLambdaPolicy
       Roles:
         - !Ref ActionEnqueuerManagerLambdaRole
       PolicyDocument:
@@ -339,7 +339,7 @@ Resources:
         - nodejs18.x
       Content:
         S3Bucket: !Ref MicroserviceBucketName
-        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover_libs.zip"
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_libs.zip"
       Description: NodeJs Libs layer
       LayerName: actionRemover-libs-layer
 
@@ -354,7 +354,7 @@ Resources:
         FunctionName: !Ref ActionRemoverManagerLambdaName
         Handler: "index.handler"
         FunctionBucketName: !Ref MicroserviceBucketName
-        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover_code.zip"
+        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_code.zip"
         MemorySize: 512
         Timeout: 10
         Runtime: nodejs18.x
@@ -476,7 +476,7 @@ Resources:
         - nodejs18.x
       Content:
         S3Bucket: !Ref MicroserviceBucketName
-        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router_libs.zip"
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_libs.zip"
       Description: NodeJs Libs layer
       LayerName: actionRouterLambda-libs-layer
 
@@ -490,7 +490,7 @@ Resources:
         FunctionName: !Ref ActionRouterManagerLambdaName
         Handler: "index.handler"
         FunctionBucketName: !Ref MicroserviceBucketName
-        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router_code.zip"
+        FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_code.zip"
         MemorySize: 512
         Timeout: 10
         Runtime: nodejs18.x
