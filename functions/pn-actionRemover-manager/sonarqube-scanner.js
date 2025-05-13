@@ -1,6 +1,6 @@
 const options = {
   "sonar.organization": "pagopa",
-  "sonar.projectKey": "pagopa_pn-delivery-push-ActionRemover",
+  "sonar.projectKey": "pagopa_pn-action-manager-ActionRemover",
 };
 
 if (process.env.PR_NUM) {

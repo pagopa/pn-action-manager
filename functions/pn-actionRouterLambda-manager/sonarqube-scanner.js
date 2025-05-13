@@ -1,6 +1,6 @@
 const options = {
   "sonar.organization": "pagopa",
-  "sonar.projectKey": "pagopa_pn-delivery-push-pnActionRouter",
+  "sonar.projectKey": "pagopa_pn-action-manager-pnActionRouter",
 };
 
 if (process.env.PR_NUM) {
