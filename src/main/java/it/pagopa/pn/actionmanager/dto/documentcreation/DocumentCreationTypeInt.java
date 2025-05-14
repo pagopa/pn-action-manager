@@ -2,7 +2,9 @@ package it.pagopa.pn.actionmanager.dto.documentcreation;
 
 
 import it.pagopa.pn.actionmanager.dto.legalfacts.LegalFactCategoryInt;
+import lombok.Getter;
 
+@Getter
 public enum DocumentCreationTypeInt {
 
     ANALOG_FAILURE_DELIVERY(LegalFactCategoryInt.ANALOG_FAILURE_DELIVERY.getValue()),
@@ -19,10 +21,6 @@ public enum DocumentCreationTypeInt {
 
     DocumentCreationTypeInt(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override

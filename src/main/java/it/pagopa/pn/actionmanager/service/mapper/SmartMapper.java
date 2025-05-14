@@ -1,5 +1,7 @@
 package it.pagopa.pn.actionmanager.service.mapper;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -10,12 +12,12 @@ import java.util.function.BiFunction;
 
 @Slf4j
 @Component
+@Data
+@NoArgsConstructor
 public class SmartMapper {
 
     private static ModelMapper modelMapper;
     private static BiFunction postMappingTransformer;
-    
-    public SmartMapper(){}
 
     static{
         modelMapper = new ModelMapper();

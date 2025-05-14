@@ -28,12 +28,29 @@ class ActionServiceImplTest {
     }
 
     @Test
+    void unscheduleAction(){
+        String timeSlot = "2021-09-16T15:24";
+        String actionId = "001";
+        actionService.unscheduleAction(actionId, timeSlot);
+
+        // Verifica che il DAO sia stato chiamato con l'oggetto corretto
+        Mockito.verify(actionDao, Mockito.times(1)).unscheduleAction(Mockito.any(), Mockito.eq(timeSlot));
+    }
+
+    @Test
     void addOnlyActionIfAbsent() {
         Action action = buildAction();
 
+        // Calcola il valore atteso di timeslot
+        String expectedTimeSlot = "2021-09-16T15:24";
+        Action expectedAction = action.toBuilder()
+                .timeslot(expectedTimeSlot)
+                .build();
+
         actionService.addOnlyActionIfAbsent(action);
 
-        Mockito.verify(actionDao, Mockito.times(1)).addOnlyActionIfAbsent(action);
+        // Verifica che il DAO sia stato chiamato con l'oggetto corretto
+        Mockito.verify(actionDao, Mockito.times(1)).addOnlyActionIfAbsent(expectedAction);
     }
 
     private Action buildAction() {
@@ -47,4 +64,5 @@ class ActionServiceImplTest {
                 .notBefore(instant)
                 .build();
     }
+
 }
