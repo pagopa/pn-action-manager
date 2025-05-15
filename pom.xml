@@ -18,7 +18,7 @@
 	  <tag>HEAD</tag>
   </scm>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>21</java.version>
 		<awspring.version>3.3.0</awspring.version>
 	</properties>
 
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>it.pagopa.pn</groupId>
 			<artifactId>pn-commons</artifactId>
-			<version>2.12.0-SNAPSHOT</version>
+			<version>2.12.0-SPRINGBOOT3</version>
 		</dependency>
 
 		<dependency>
@@ -86,7 +86,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/generated/**</exclude>
-						<exclude>**it/pagopa/pn/template/rest/v1/**</exclude>
+						<exclude>**it/pagopa/pn/action-manager/rest/v1/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -102,7 +102,7 @@
 						</goals>
 						<phase>process-resources</phase>
 						<configuration>
-							<inputSpec>${project.basedir}/docs/openapi/pn-template.yaml</inputSpec>
+							<inputSpec>${project.basedir}/docs/openapi/pn-action-manager.yaml</inputSpec>
 							<generatorName>spring</generatorName>
               				<library>spring-boot</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
@@ -118,10 +118,10 @@
 							<reactive>true</reactive>
 							<skipDefaultInterface>false</skipDefaultInterface>
 							<useTags>true</useTags>
-							<basePackage>${project.groupId}.template.rest.v1</basePackage>
-							<modelPackage>${project.groupId}.template.rest.v1.dto</modelPackage>
-							<apiPackage>${project.groupId}.template.rest.v1.api</apiPackage>
-							<configPackage>${project.groupId}.template.rest.v1.config</configPackage>
+							<basePackage>${project.groupId}.action-manager.rest.v1</basePackage>
+							<modelPackage>${project.groupId}.action-manager.rest.v1.dto</modelPackage>
+							<apiPackage>${project.groupId}.action-manager.rest.v1.api</apiPackage>
+							<configPackage>${project.groupId}.action-manager.rest.v1.config</configPackage>
 							</configOptions>				
 						</configuration>
 					</execution>
