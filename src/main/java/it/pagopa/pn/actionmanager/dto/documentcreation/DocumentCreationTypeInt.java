@@ -1,11 +1,11 @@
 package it.pagopa.pn.actionmanager.dto.documentcreation;
 
 
-import it.pagopa.pn.actionmanager.dto.legalfacts.LegalFactCategoryInt;
 import lombok.Getter;
 
 @Getter
 public enum DocumentCreationTypeInt {
+    AAR("AAR"),
 
     ANALOG_FAILURE_DELIVERY(LegalFactCategoryInt.ANALOG_FAILURE_DELIVERY.getValue()),
 

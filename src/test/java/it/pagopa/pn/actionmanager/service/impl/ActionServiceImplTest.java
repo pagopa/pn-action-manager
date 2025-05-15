@@ -4,6 +4,7 @@ package it.pagopa.pn.actionmanager.service.impl;
 import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +20,15 @@ class ActionServiceImplTest {
     @Mock
     private ActionDao actionDao;
 
+    @Mock
+    private FutureActionDao futureActionDao;
+
     private ActionServiceImpl actionService;
 
     @BeforeEach
     public void setup() {
         actionDao = Mockito.mock(ActionDao.class);
-        actionService = new ActionServiceImpl(actionDao);
+        actionService = new ActionServiceImpl(actionDao, futureActionDao);
     }
 
     @Test
@@ -34,7 +38,7 @@ class ActionServiceImplTest {
         actionService.unscheduleAction(actionId, timeSlot);
 
         // Verifica che il DAO sia stato chiamato con l'oggetto corretto
-        Mockito.verify(actionDao, Mockito.times(1)).unscheduleAction(Mockito.any(), Mockito.eq(timeSlot));
+        Mockito.verify(futureActionDao, Mockito.times(1)).unscheduleAction(Mockito.any(), Mockito.eq(timeSlot));
     }
 
     @Test

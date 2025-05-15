@@ -2,7 +2,6 @@ package it.pagopa.pn.actionmanager.dto.action.details;
 
 
 import it.pagopa.pn.actionmanager.dto.action.ActionDetails;
-import it.pagopa.pn.actionmanager.dto.timeline.NotificationRefusedErrorInt;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

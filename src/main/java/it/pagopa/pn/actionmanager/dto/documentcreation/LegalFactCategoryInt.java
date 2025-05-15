@@ -1,4 +1,4 @@
-package it.pagopa.pn.actionmanager.dto.legalfacts;
+package it.pagopa.pn.actionmanager.dto.documentcreation;
 
 import lombok.Getter;
 

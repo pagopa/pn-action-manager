@@ -74,36 +74,4 @@ class ActionDaoDynamoTestIT{
                 .getLevel());
     }
 
-    @Test
-    @ExtendWith(SpringExtension.class)
-    void unscheduleActionFailSilent() {
-        String timeSlot = "2021-09-16T15:24";
-        String actionId = "Test_unscheduleActionFailSilent_actionId";
-
-        // Ottieni il logger di Logback
-        Logger fooLogger = LoggerFactory.getLogger(ActionDaoDynamo.class);
-
-        // Crea e avvia un ListAppender
-        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-        listAppender.start();
-
-        // Aggiungi l'appender al logger
-        ((ch.qos.logback.classic.Logger) fooLogger).addAppender(listAppender);
-
-        // Verifica che il metodo non lanci eccezioni
-        Assertions.assertDoesNotThrow(() ->
-                actionDao.unscheduleAction(timeSlot, actionId)
-        );
-
-        // Recupera i log registrati
-        List<ILoggingEvent> logsList = listAppender.list;
-
-        // Verifica che il messaggio di log sia corretto
-        Assertions.assertEquals(
-                String.format("Action not found for timeSlot=%s and actionId=%s", timeSlot, actionId),
-                logsList.get(0).getFormattedMessage()
-        );
-        Assertions.assertEquals(Level.ERROR, logsList.get(0).getLevel());
-    }
-
 }

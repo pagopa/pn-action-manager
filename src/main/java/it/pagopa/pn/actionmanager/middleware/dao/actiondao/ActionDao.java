@@ -6,5 +6,4 @@ public interface ActionDao {
     String IMPLEMENTATION_TYPE_PROPERTY_NAME = "pn.middleware.impl.action-dao";
 
     void addOnlyActionIfAbsent(Action action);
-    void unscheduleAction(String timeSlot, String actionId);
 }

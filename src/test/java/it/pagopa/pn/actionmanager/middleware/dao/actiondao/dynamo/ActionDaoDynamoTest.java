@@ -1,8 +1,6 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
-import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionEntityDao;
-import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionEntityDao;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.Mockito;

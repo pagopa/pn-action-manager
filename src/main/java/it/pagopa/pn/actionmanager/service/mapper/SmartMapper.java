@@ -7,8 +7,6 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Component;
 
-import java.util.function.BiFunction;
-
 
 @Slf4j
 @Component
@@ -17,7 +15,6 @@ import java.util.function.BiFunction;
 public class SmartMapper {
 
     private static ModelMapper modelMapper;
-    private static BiFunction postMappingTransformer;
 
     static{
         modelMapper = new ModelMapper();
@@ -32,8 +29,6 @@ public class SmartMapper {
         T result;
         if( source != null) {
             result = modelMapper.map(source, destinationClass );
-
-            result = (T) postMappingTransformer.apply(source, result);
         } else {
             result = null;
         }

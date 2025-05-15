@@ -1,4 +1,4 @@
-package it.pagopa.pn.actionmanager.dto.timeline;
+package it.pagopa.pn.actionmanager.dto.action.details;
 
 import lombok.*;
 
