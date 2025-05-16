@@ -1,15 +1,11 @@
 package it.pagopa.pn.actionmanager.config;
 
 import it.pagopa.pn.commons.conf.SharedAutoConfiguration;
-import lombok.CustomLog;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import javax.annotation.PostConstruct;
-import java.time.Duration;
-import java.time.Instant;
+import jakarta.annotation.PostConstruct;
 
 
 @Configuration
