@@ -24,11 +24,104 @@ Parameters:
     Type: String
     Description: 'Where to send CDC'
 
+  AlarmSNSTopicName:
+    Type: String
+    Description: 'Topic alarm'
+
+  LogsKinesisSourceStreamArn:
+    Type: String
+    Description: 'Where to send Logs'
+
+  LogRetention:
+    Type: Number
+    Default: 14
+
 Resources:
-    NullResource:
-        Type: AWS::CloudFormation::WaitConditionHandle
+  PnActionManagerLogGroup:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/log-group.yaml"
+      Parameters:
+        LogGroupName: !Sub '${ProjectName}-action-manager'
+        LogsKinesisSourceStreamArn: !Ref LogsKinesisSourceStreamArn
+        LogGroupRetention: !Ref LogRetention
+
+  ActionRouterManagerDLQ:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: !Sub '${ProjectName}-action_manager_action_router_DLQ'
+        DelaySeconds: 1
+        AlarmSNSTopicName: !Ref AlarmSNSTopicName
+        HasDLQ: "false"
+        QueueHasAlarm: "true"
+
+  ActionEnqueuerManagerDLQ:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: !Sub '${ProjectName}-action_manager_action_enqueuer_DLQ'
+        DelaySeconds: 1
+        AlarmSNSTopicName: !Ref AlarmSNSTopicName
+        HasDLQ: "false"
+        QueueHasAlarm: "true"
+
+  ActionTimeoutErrorDLQ:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: !Sub '${ProjectName}-action_manager_action-timeout-error-DLQ'
+        DelaySeconds: 1
+        AlarmSNSTopicName: !Ref AlarmSNSTopicName
+        HasDLQ: "false"
+        QueueHasAlarm: "true"
+
 
 Outputs:
-    SampleOutput:
-      Description: A Sample Output
-      Value: 'na'
+  EcsLogGroup:
+    Value: !GetAtt PnActionManagerLogGroup.Outputs.LogGroupName
+
+  ActionRouterManagerLambdaName:
+    Value: !Sub "${ProjectName}-actionRouterLambda-manager"
+
+  ActionEnqueuerManagerLambdaName:
+    Value: !Sub "${ProjectName}-actionEnqueuer-manager"
+
+  ActionRemoverManagerLambdaName:
+    Value: !Sub "${ProjectName}-actionRemover-manager"
+
+  ActionRouterManagerDLQARN:
+    Value: !GetAtt ActionRouterManagerDLQ.Outputs.QueueARN
+    Description: ActionRouterManagerDLQ queue ARN
+  ActionRouterManagerAlarmARN:
+    Value: !GetAtt ActionRouterManagerDLQ.Outputs.SqsDLQAlarmArn
+    Description: ActionRouterManagerDLQ alarm ARN
+
+  ActionEnqueuerManagerDLQARN:
+    Value: !GetAtt ActionEnqueuerManagerDLQ.Outputs.QueueARN
+    Description: ActionEnqueuerManagerDLQ queue ARN
+  ActionEnqueuerManagerDLQAlarmARN:
+    Value: !GetAtt ActionEnqueuerManagerDLQ.Outputs.SqsDLQAlarmArn
+    Description: ActionEnqueuerManagerDLQ alarm ARN
+
+  ActionTimeoutErrorDLQARN:
+    Value: !GetAtt ActionTimeoutErrorDLQ.Outputs.QueueARN
+    Description: ActionTimeoutErrorDLQ queue ARN
+  ActionTimeoutErrorDLQAlarmARN:
+    Value: !GetAtt ActionTimeoutErrorDLQ.Outputs.SqsDLQAlarmArn
+    Description: ActionTimeoutErrorDLQ alarm ARN
+  ActionTimeoutErrorDLQURL:
+    Value: !GetAtt ActionTimeoutErrorDLQ.Outputs.QueueURL
+    Description: ActionTimeoutErrorDLQ queue URL
+
