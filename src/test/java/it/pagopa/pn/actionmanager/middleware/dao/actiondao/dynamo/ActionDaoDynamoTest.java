@@ -11,22 +11,33 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.test.StepVerifier;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 class ActionDaoDynamoTest {
     @Mock
     private PnActionManagerConfigs pnActionManagerConfigs;
 
     @Mock
-    private DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient;
 
     @Mock
     private ActionDaoDynamo dynamo;
+
+    @Mock
+    private  DynamoDbAsyncTable<ActionEntity> table;
 
     @Mock
     private ActionDao actionDao;
@@ -40,20 +51,18 @@ class ActionDaoDynamoTest {
         factionDao.setTableName("FutureAction");
 
         // Configura il mock per il client DynamoDB
-        DynamoDbTable<ActionEntity> mockTable = Mockito.mock(DynamoDbTable.class);
-        Mockito.when(dynamoDbEnhancedClient.table(
+        when(dynamoDbEnhancedClient.table(
                 Mockito.eq("Action"),
                 Mockito.any(TableSchema.class)
-        )).thenReturn(mockTable);
+        )).thenReturn(table);
 
-        Mockito.when(pnActionManagerConfigs.getActionDao()).thenReturn(actionDao);
-        Mockito.when(pnActionManagerConfigs.getActionTtlDays()).thenReturn("1095");
-        Mockito.when(pnActionManagerConfigs.getFutureActionDao()).thenReturn(factionDao);
+        when(pnActionManagerConfigs.getActionDao()).thenReturn(actionDao);
+        when(pnActionManagerConfigs.getActionTtlDays()).thenReturn("1095");
+
         dynamo = new ActionDaoDynamo(dynamoDbEnhancedClient, pnActionManagerConfigs);
     }
 
     @Test
-    @ExtendWith(SpringExtension.class)
     void addOnlyActionIfAbsent() {
         Action action = buildAction();
         ActionEntity actionEntity = buildActionEntity(action);
@@ -61,6 +70,21 @@ class ActionDaoDynamoTest {
         dynamo.addOnlyActionIfAbsent(action);
 
         Assertions.assertEquals(actionEntity, actionEntity);
+    }
+
+    @Test
+    void addOnlyActionIfAbsentError() {
+        // Arrange
+        Action action = buildAction();
+        ConditionalCheckFailedException exception = ConditionalCheckFailedException.builder().message("Action already exists").build();
+
+        // Simula il comportamento del metodo putItem per lanciare l'eccezione
+        when(table.putItem(Mockito.any(PutItemEnhancedRequest.class)))
+                .thenReturn(CompletableFuture.failedFuture(exception));
+
+        // Act & Assert
+        StepVerifier.create(dynamo.addOnlyActionIfAbsent(action))
+                .verifyComplete(); // Verifica che il Mono completi senza errori
     }
 
     private Action buildAction() {
