@@ -3,8 +3,6 @@ const { unmarshall } = require("@aws-sdk/util-dynamodb");
 const config = require("config");
 const { isLambdaDisabled } = require("./utils.js");
 const { ActionUtils } = require("pn-action-common");
-const { LambdaDisabledException } = require("./exceptions.js");
-const { generateKoResponse } = require("./responses");
 
 const TOLLERANCE_IN_MILLIS = config.get("RUN_TOLLERANCE_IN_MILLIS");
 
@@ -84,16 +82,16 @@ const sendMessages = async (destinationEndpoint, actions, timeoutFn) => {
   //   - caso "invio non ha avuto successo": restituisco la lista dei record non inviati ed esco
 
 async function handleEvent(event, context) {
-    // Controllo se la lambda è disabilitata
-    const featureFlag = config.get("featureFlag");
-    if (isLambdaDisabled(featureFlag)) {
-      console.warn("Lambda disabled. Flow interrupted.");
-      return generateKoResponse(new LambdaDisabledException());
-    }
-
   const emptyResult = {
     batchItemFailures: [],
   };
+
+  // Controllo se la lambda è disabilitata
+  const featureFlag = config.get("featureFlag");
+  if (isLambdaDisabled(featureFlag)) {
+    console.log("Lambda disabled. Flow interrupted.");
+    return emptyResult;
+  }
 
   console.log("[ACTION_ENQUEUER]", "Started");
   console.log("[ACTION_ENQUEUER]", "Event DATA", event);

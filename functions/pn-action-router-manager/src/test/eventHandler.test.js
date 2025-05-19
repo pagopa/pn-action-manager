@@ -22,7 +22,8 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
         var date = new Date();
         let isoDateNow = date.toISOString();
         return isoDateNow < notBefore;
-      }
+      },
+      isLambdaDisabled: (featureFlag) => false
     },
 
     "./sqs/writeToSqs.js": {
@@ -69,7 +70,7 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
     },
 });
 
-describe("eventHandlerTest", function () {
+describe("eventHandlerTest (lambda enabled)", function () {
   let queueAction1Url = "https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions1";
   let queueAction2Url = "https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions2";
 
@@ -84,96 +85,6 @@ describe("eventHandlerTest", function () {
   after(() => {
     delete process.env[[config.get("ACTION_MAP_ENV_VARIABLE")]];
     delete process.env[[config.get("QUEUE_ENDPOINTS_ENV_VARIABLE")]];
-  });
-
-  it("should return KO response when lambda is disabled", async () => {
-    // Mock delle dipendenze
-    const fakeFeatureFlag = "DISABLED";
-    const fakeKoResponse = { error: "lambda disabled" };
-
-    // Mock dei moduli
-    const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./utils/utils.js": {
-        isLambdaDisabled: (flag) => flag === fakeFeatureFlag,
-        isRecordToSend: () => true,
-        isFutureAction: () => false
-      },
-      "./utils/responses": {
-        generateKoResponse: () => fakeKoResponse
-      },
-      "./exceptions/exceptions.js": {
-        LambdaDisabledException: function() {}
-      },
-      config: {
-        get: (key) => {
-          if (key === "featureFlag") return fakeFeatureFlag;
-          return "";
-        }
-      }
-    });
-
-    // WHEN
-    const res = await eventHandler.handleEvent({ Records: [] }, contextMock);
-
-    // THEN
-    expect(res).to.deep.equal(fakeKoResponse);
-  });
-
-  it("should process event when lambda is enabled", async () => {
-    // Mock delle dipendenze
-    const fakeFeatureFlag = "ENABLED";
-    const fakeResult = { batchItemFailures: [] };
-
-    const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./utils/utils.js": {
-        isLambdaDisabled: (flag) => flag === "DISABLED",
-        isRecordToSend: () => true,
-        isFutureAction: () => false
-      },
-      "./utils/responses": {
-        generateKoResponse: () => ({ error: "lambda disabled" })
-      },
-      "./exceptions/exceptions.js": {
-        LambdaDisabledException: function() {}
-      },
-      config: {
-        get: (key) => {
-          if (key === "featureFlag") return fakeFeatureFlag;
-          return "";
-        }
-      },
-      "./sqs/writeToSqs.js": {
-        writeMessagesToQueue: async () => []
-      },
-      "./dynamo/writeToDynamo.js": {
-        writeMessagesToDynamo: async () => []
-      },
-      "pn-action-common": {
-        ActionUtils: {
-          getQueueUrl: async () => "queueUrl"
-        }
-      },
-      "@aws-sdk/util-dynamodb": {
-        unmarshall: (action) => ({ ...action, kinesisSeqNo: "seq" })
-      }
-    });
-
-    // Evento di esempio
-    const mockEvent = {
-      Records: [
-        {
-          kinesis: {
-            sequenceNumber: "seq",
-            data: Buffer.from(JSON.stringify({
-              dynamodb: { NewImage: { actionId: { S: "id1" }, notBefore: { S: new Date().toISOString() }, type: { S: "TYPE" }, details: { S: "details" } } }
-            })).toString("base64")
-          }
-        }
-      ]
-    };
-
-    const res = await eventHandler.handleEvent(mockEvent, {});
-    expect(res).to.deep.equal(fakeResult);
   });
 
   it("complete-test", async () => {
@@ -351,6 +262,25 @@ describe("eventHandlerTest", function () {
     //Viene verificato che sia stata inviata la sola azione attesa futureAction1Data
     checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue);
   });
+});
+
+describe("eventHandlerTest (lambda disabled)", function () {
+  it("should return OK response when lambda is disabled (featureFlag)", async () => {
+    const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
+      "./utils/utils.js": {
+        isLambdaDisabled: (featureFlag) => true
+      }
+    });
+    
+    const res = await eventHandler.handleEvent({}, {});
+
+    //THEN
+    //Viene verificato che non ci siano item per la quale la put su dynamo o in coda sia fallita
+    expect(res).deep.equals({
+      batchItemFailures: [],
+    });
+  });
+  
 });
 
 function checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue, actionToQueueNameMap, queueNameMapToQueueUrlMap){

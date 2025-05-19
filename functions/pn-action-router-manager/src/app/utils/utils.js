@@ -38,9 +38,9 @@ function addDaysToDate(startDate, daysToAdd) {
     return unixTimestamp;
 }
 
-const isLambdaDisabled = (featureFlag, currentDate = new Date()) => {
-  const start = new Date(featureFlag.start);
-  const end = new Date(featureFlag.end);
+const isLambdaDisabled = (featureFlag) => {
+  const currentDate = new Date().toISOString();
+  const { start, end } = featureFlag;
 
   return currentDate < start || currentDate > end;
 };

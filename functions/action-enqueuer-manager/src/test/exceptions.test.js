@@ -19,10 +19,3 @@ describe("test TimeoutException", () => {
     expect(exception.name).to.eq("TimeoutException");
   });
 });
-
-describe("test LambdaDisabledException", () => {
-  it("should set name", () => {
-    const exception = new LambdaDisabledException();
-    expect(exception.name).to.eq("LambdaDisabledException");
-  });
-});

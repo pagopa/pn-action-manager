@@ -10,8 +10,7 @@ const {
 } = require("../app/timeHelper");
 
 const {
-  InvalidItemException,
-  LambdaDisabledException
+  InvalidItemException
 } = require("../app/exceptions");
 
 
@@ -43,6 +42,9 @@ const testOverride = (
       nextTimeSlot,
       isAfter,
       toString: (d) => dateToString(d),
+    },
+    "./utils.js": {
+      isLambdaDisabled: () => false,
     },
 
     "./dynamoFunctions.js": {
@@ -85,74 +87,7 @@ const testOverride = (
   };
 };
 
-it("should return KO response when lambda is disabled (featureFlag)", async () => {
-  const fakeFeatureFlag = "DISABLED";
-  const fakeKoResponse = { statusCode: 500, body: JSON.stringify({ error: { name: "LambdaDisabledException" } }) };
-
-  const lambda = proxyquire.noCallThru().load(
-    "../app/eventHandler.js",
-    {
-      config: {
-        get: (key) => key === "featureFlag" ? fakeFeatureFlag : "dummy"
-      },
-      "./utils.js": {
-        isLambdaDisabled: (flag) => flag === fakeFeatureFlag
-      },
-      "./responses": {
-        generateKoResponse: (err) => fakeKoResponse,
-        generateOkResponse: () => { throw new Error("Non deve essere chiamato"); }
-      },
-      "./dynamoFunctions.js": {},
-      "./timeHelper": {},
-      "./exceptions.js": {
-        LambdaDisabledException: function() { this.name = "LambdaDisabledException"; }
-      }
-    }
-  );
-
-  const res = await lambda.handleEvent(null, { getRemainingTimeInMillis: () => 10000 });
-  expect(res).to.deep.equal(fakeKoResponse);
-});
-
-it("should proceed when lambda is enabled (featureFlag)", async () => {
-  const fakeFeatureFlag = "ENABLED";
-  const fakeOkResponse = { statusCode: 200, body: JSON.stringify({}) };
-
-  const lambda = proxyquire.noCallThru().load(
-    "../app/eventHandler.js",
-    {
-      config: {
-        get: (key) => key === "featureFlag" ? fakeFeatureFlag : "dummy"
-      },
-      "./utils.js": {
-        isLambdaDisabled: (flag) => flag === "DISABLED"
-      },
-      "./responses": {
-        generateKoResponse: () => { throw new Error("Non deve essere chiamato"); },
-        generateOkResponse: () => fakeOkResponse
-      },
-      "./dynamoFunctions.js": {
-        getLastTimeSlotWorked: async () => "2024-05-22T11:57",
-        setLastTimeSlotWorked: async () => {},
-        getActionsByTimeSlot: async () => ({ items: [] }),
-        batchDelete: async () => ({ operationResult: true, discarded: 0 })
-      },
-      "./timeHelper": {
-        parseISO: (s) => s,
-        actTime: () => "2024-05-22T12:00",
-        nextTimeSlot: (s) => s === "2024-05-22T11:57" ? "2024-05-22T11:58" : "2024-05-22T12:01",
-        toString: (d) => d,
-        isAfter: (a, b) => a > b
-      },
-      "./exceptions.js": {}
-    }
-  );
-
-  const res = await lambda.handleEvent(null, { getRemainingTimeInMillis: () => 10000 });
-  expect(res).to.deep.equal(fakeOkResponse);
-});
-
-describe("eventHandler tests", () => {
+describe("eventHandler tests (lambda enabled)", () => {
 
   it("two slot with data partition", async () => {
     let timeslot = {lastWorkedTimeslot: "2024-05-22T11:57"};
@@ -345,4 +280,27 @@ describe("eventHandler tests", () => {
     expect(timeslot.lastWorkedTimeslot).to.be.equal("2024-05-22T11:59");
 
   });
+
+ 
+});
+
+describe("eventHandler tests (lambda disabled)", () => {
+
+  it("should return OK response when lambda is disabled (featureFlag)", async () => {
+    const lambda = proxyquire.noCallThru().load(
+      "../app/eventHandler.js",
+      {
+        "./utils.js": {
+          isLambdaDisabled: () => true,
+        },
+        "./dynamoFunctions.js": {},
+        "./timeHelper": {}
+      }
+    );
+
+    const result = await lambda.handleEvent(null, { getRemainingTimeInMillis: () => 10000 });
+    expect(result).to.not.be.null;
+    expect(result.statusCode).to.be.eq(200);
+  })
+
 });

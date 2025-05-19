@@ -38,6 +38,5 @@ module.exports = {
   InvalidDateException,
   ItemNotFoundException,
   InvalidItemException,
-  BatchOperationException,
-  LambdaDisabledException
+  BatchOperationException
 };
