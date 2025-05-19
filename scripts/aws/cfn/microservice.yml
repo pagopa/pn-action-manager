@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Example microservice deploy'
+Description: 'Microservice deploy for pn-action-manager'
 
 Parameters:
   ProjectName:
