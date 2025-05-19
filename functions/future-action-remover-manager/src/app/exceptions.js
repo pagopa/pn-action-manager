@@ -20,6 +20,13 @@ class InvalidItemException extends Error {
   }
 }
 
+class LambdaDisabledException extends Error {
+  constructor() {
+    super(`${e.message} - date range exceeded, so lambda is disabled`);
+    this.name = "LambdaDisabledException";
+  }
+}
+
 class InvalidDateException extends Error {
   constructor(d) {
     super(`Invalid Date Found ${d}`);
@@ -32,4 +39,5 @@ module.exports = {
   ItemNotFoundException,
   InvalidItemException,
   BatchOperationException,
+  LambdaDisabledException
 };

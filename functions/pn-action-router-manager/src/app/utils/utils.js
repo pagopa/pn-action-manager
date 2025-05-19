@@ -38,4 +38,11 @@ function addDaysToDate(startDate, daysToAdd) {
     return unixTimestamp;
 }
 
-module.exports = { isRecordToSend, isTimeToLeave, isFutureAction, addDaysToDate};
+const isLambdaDisabled = (featureFlag, currentDate = new Date()) => {
+  const start = new Date(featureFlag.start);
+  const end = new Date(featureFlag.end);
+
+  return currentDate < start || currentDate > end;
+};
+
+module.exports = { isRecordToSend, isTimeToLeave, isFutureAction, addDaysToDate, isLambdaDisabled};

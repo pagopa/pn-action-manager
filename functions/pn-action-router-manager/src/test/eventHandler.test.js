@@ -86,6 +86,96 @@ describe("eventHandlerTest", function () {
     delete process.env[[config.get("QUEUE_ENDPOINTS_ENV_VARIABLE")]];
   });
 
+  it("should return KO response when lambda is disabled", async () => {
+    // Mock delle dipendenze
+    const fakeFeatureFlag = "DISABLED";
+    const fakeKoResponse = { error: "lambda disabled" };
+
+    // Mock dei moduli
+    const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
+      "./utils/utils.js": {
+        isLambdaDisabled: (flag) => flag === fakeFeatureFlag,
+        isRecordToSend: () => true,
+        isFutureAction: () => false
+      },
+      "./utils/responses": {
+        generateKoResponse: () => fakeKoResponse
+      },
+      "./exceptions/exceptions.js": {
+        LambdaDisabledException: function() {}
+      },
+      config: {
+        get: (key) => {
+          if (key === "featureFlag") return fakeFeatureFlag;
+          return "";
+        }
+      }
+    });
+
+    // WHEN
+    const res = await eventHandler.handleEvent({ Records: [] }, contextMock);
+
+    // THEN
+    expect(res).to.deep.equal(fakeKoResponse);
+  });
+
+  it("should process event when lambda is enabled", async () => {
+    // Mock delle dipendenze
+    const fakeFeatureFlag = "ENABLED";
+    const fakeResult = { batchItemFailures: [] };
+
+    const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
+      "./utils/utils.js": {
+        isLambdaDisabled: (flag) => flag === "DISABLED",
+        isRecordToSend: () => true,
+        isFutureAction: () => false
+      },
+      "./utils/responses": {
+        generateKoResponse: () => ({ error: "lambda disabled" })
+      },
+      "./exceptions/exceptions.js": {
+        LambdaDisabledException: function() {}
+      },
+      config: {
+        get: (key) => {
+          if (key === "featureFlag") return fakeFeatureFlag;
+          return "";
+        }
+      },
+      "./sqs/writeToSqs.js": {
+        writeMessagesToQueue: async () => []
+      },
+      "./dynamo/writeToDynamo.js": {
+        writeMessagesToDynamo: async () => []
+      },
+      "pn-action-common": {
+        ActionUtils: {
+          getQueueUrl: async () => "queueUrl"
+        }
+      },
+      "@aws-sdk/util-dynamodb": {
+        unmarshall: (action) => ({ ...action, kinesisSeqNo: "seq" })
+      }
+    });
+
+    // Evento di esempio
+    const mockEvent = {
+      Records: [
+        {
+          kinesis: {
+            sequenceNumber: "seq",
+            data: Buffer.from(JSON.stringify({
+              dynamodb: { NewImage: { actionId: { S: "id1" }, notBefore: { S: new Date().toISOString() }, type: { S: "TYPE" }, details: { S: "details" } } }
+            })).toString("base64")
+          }
+        }
+      ]
+    };
+
+    const res = await eventHandler.handleEvent(mockEvent, {});
+    expect(res).to.deep.equal(fakeResult);
+  });
+
   it("complete-test", async () => {
     //GIVEN
     initializeMockData()

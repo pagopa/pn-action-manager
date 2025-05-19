@@ -1,13 +1,22 @@
-const { isRecordToSend, isFutureAction } = require("./utils/utils.js");
+const { isRecordToSend, isFutureAction, isLambdaDisabled } = require("./utils/utils.js");
 const { getActionDestination } = require("./utils/getActionDestination.js");
 const { writeMessagesToQueue } = require("./sqs/writeToSqs.js");
 const { writeMessagesToDynamo } = require("./dynamo/writeToDynamo.js");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
+const { isLambdaDisabled } = require("./utils.js");
+const { LambdaDisabledException} = require("./exceptions/exceptions.js");
+const { generateKoResponse } = require("./utils/responses");
 const { ActionUtils } = require("pn-action-common");
 const config = require("config");
 
 async function handleEvent(event, context){
   console.log('Start handling event')
+  // Controllo se la lambda è disabilitata
+      const featureFlag = config.get("featureFlag");
+      if (isLambdaDisabled(featureFlag)) {
+        console.warn("Lambda disabled. Flow interrupted.");
+        return generateKoResponse(new LambdaDisabledException());
+      }
 
   let notSendedActions = await startHandleEvent(event, context);
   const result = {

@@ -171,6 +171,14 @@ Parameters:
     Type: String
     Default: 'FATAL'
 
+  ActionLambdasEnabledStart:
+    Type: String
+    Description: 'Enable action lambdas start'
+
+  ActionLambdasEnabledEnd:
+    Type: String
+    Description: 'Enable action lambdas end'
+
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -266,11 +274,13 @@ Resources:
         RoleArn: !GetAtt ActionEnqueuerManagerLambdaRole.Arn
         Layer1: !Ref ActionEnqueuerManagerLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}",
+          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
           {
             actionQueueMap: !Ref ActionQueueMap,
             QueueUrlMap: !Ref QueueUrlMap,
-            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
+            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL,
+            LambdaEnabledStart: !Ref ActionLambdasEnabledStart,
+            LambdaEnabledEnd: !Ref ActionLambdasEnabledEnd
           }
         ]
 
@@ -361,7 +371,13 @@ Resources:
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRemoverManagerLambdaRole.Arn
         Layer1: !Ref ActionRemoverManagerLambdaLibrariesLayer
-        EnvVariables: "LAST_WORKED_KEY=2"
+        EnvVariables: !Sub [
+          "LAST_WORKED_KEY=2###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
+          {
+            LambdaEnabledStart: !Ref ActionLambdasEnabledStart,
+            LambdaEnabledEnd: !Ref ActionLambdasEnabledEnd
+          }
+        ]
 
 
   # Lambda function role
@@ -497,16 +513,17 @@ Resources:
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRouterLambdaRole.Arn
         Layer1: !Ref ActionRouterLambdaLibrariesLayer
-        EnvVariables:
-          !Sub [
-            "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}",
-            {
-              actionQueueMap: !Ref ActionQueueMap,
-              QueueUrlMap: !Ref QueueUrlMap,
-              FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
-              ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
-            },
-          ]
+        EnvVariables: !Sub [
+          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
+          {
+            actionQueueMap: !Ref ActionQueueMap,
+            QueueUrlMap: !Ref QueueUrlMap,
+            FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
+            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL,
+            LambdaEnabledStart: !Ref ActionLambdasEnabledStart,
+            LambdaEnabledEnd: !Ref ActionLambdasEnabledEnd
+          }
+        ]
 
   # Lambda function role
   ActionRouterLambdaRole:

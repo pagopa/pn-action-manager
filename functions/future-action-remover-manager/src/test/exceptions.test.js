@@ -2,7 +2,8 @@ const {
   InvalidDateException,
   ItemNotFoundException,
   BatchOperationException,
-  InvalidItemException
+  InvalidItemException,
+  LambdaDisabledException
 } = require("../app/exceptions");
 
 const { expect } = require("chai");
@@ -52,5 +53,12 @@ describe("test BatchOperationException", () => {
     expect(exception.message).to.eq(
       `Error doing batch ${operation}. Original message ${mainError}`
     );
+  });
+});
+
+describe("test LambdaDisabledException", () => {
+  it("should set name", () => {
+    const exception = new LambdaDisabledException();
+    expect(exception.name).to.eq("LambdaDisabledException");
   });
 });
