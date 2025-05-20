@@ -1,0 +1,23 @@
+{
+  "name": "pn-action-common-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "nyc --reporter=html --reporter=text mocha './test/**/*.test.js' --recursive --timeout=3000 --exit -r dotenv/config"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "axios-mock-adapter": "^1.22.0",
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
+    "lambda-tester": "^4.0.1",
+    "mocha": "^11.2.2",
+    "nyc": "^15.1.0",
+    "sonarqube-scanner": "^3.3.0"
+  },
+  "dependencies": {
+    "axios": "^1.8.2"
+  }
+}

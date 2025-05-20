@@ -1,0 +1,21 @@
+{
+  "RUN_TOLLERANCE_IN_MILLIS": 3000,
+  "MAX_SQS_BATCH_SIZE": 1,
+  "timeout": {
+    "DEFAULT_SOCKET_TIMEOUT": 1000,
+    "DEFAULT_REQUEST_TIMEOUT": 1000,
+    "DEFAULT_CONNECTION_TIMEOUT": 1000
+  },
+  "TIMEOUT_EXCEPTIONS": [
+    "TimeoutError",
+    "RequestTimeout",
+    "RequestTimeoutException"
+  ],
+  "featureFlag": {
+    "start": "2030-04-30T12:00",
+    "end": "2099-04-30T12:00"
+  },
+  "QUEUE_ENDPOINTS_ENV_VARIABLE": "QUEUE_URL_MAP",
+  "ACTION_MAP_ENV_VARIABLE": "ACTION_QUEUE_MAP",
+  "TIMEOUT_DLQ": "http://test"
+}
