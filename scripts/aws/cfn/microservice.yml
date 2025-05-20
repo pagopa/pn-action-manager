@@ -37,6 +37,15 @@ Parameters:
     Default: ''
     Description: 'Name of the bucket where the microservice files are copied during deploy'
 
+  MicroserviceBucketBaseKey:
+    Type: String
+    Default: ''
+    Description: 'Base key of the microservice in the s3 bucket'
+
+  ContainerImageUri:
+    Type: String
+    Description: 'Exact container image URI with full repository and image digest'
+
   ActionQueueMap:
     Type: String
     Description: 'Define relation from actionType to sqs queue name'
