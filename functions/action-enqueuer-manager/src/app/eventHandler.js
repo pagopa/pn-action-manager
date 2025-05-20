@@ -1,6 +1,7 @@
 const { putMessages } = require("./sqsFunctions");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 const config = require("config");
+const { isLambdaDisabled } = require("./utils.js");
 const { ActionUtils } = require("pn-action-common");
 
 const TOLLERANCE_IN_MILLIS = config.get("RUN_TOLLERANCE_IN_MILLIS");
@@ -84,6 +85,13 @@ async function handleEvent(event, context) {
   const emptyResult = {
     batchItemFailures: [],
   };
+
+  // Controllo se la lambda è disabilitata
+  const featureFlag = config.get("featureFlag");
+  if (isLambdaDisabled(featureFlag)) {
+    console.log("Lambda disabled. Flow interrupted.");
+    return emptyResult;
+  }
 
   console.log("[ACTION_ENQUEUER]", "Started");
   console.log("[ACTION_ENQUEUER]", "Event DATA", event);

@@ -43,6 +43,7 @@ describe("eventHandler test ", function () {
       },
       "./utils.js": {
         getQueueName: (actionType, _details, _envVarName) => actionType,
+        isLambdaDisabled: (flag) => false
       },
     });
 
@@ -53,6 +54,7 @@ describe("eventHandler test ", function () {
     expect(result.batchItemFailures).to.be.empty;
     expect(invokedCount).equal(1);
   });
+
   it("send record in oneQueue - two element", async () => {
     const testData = require("./streamData/two-oneQueue.json");
 
@@ -78,6 +80,7 @@ describe("eventHandler test ", function () {
       },
       "./utils.js": {
         getQueueName: (actionType, _details, _envVarName) => actionType,
+        isLambdaDisabled: (flag) => false
       },
     });
 
@@ -113,6 +116,7 @@ describe("eventHandler test ", function () {
       },
       "./utils.js": {
         getQueueName: (actionType, _details, _envVarName) => actionType,
+        isLambdaDisabled: (flag) => false
       },
     });
 
@@ -149,6 +153,7 @@ describe("eventHandler test ", function () {
       },
       "./utils.js": {
         getQueueName: (actionType, _details, _envVarName) => actionType,
+        isLambdaDisabled: (flag) => false
       },
     });
 
@@ -184,6 +189,7 @@ describe("eventHandler test ", function () {
       },
       "./utils.js": {
         getQueueName: (actionType, _details, _envVarName) => actionType,
+        isLambdaDisabled: (flag) => false
       },
     });
 
@@ -218,6 +224,7 @@ describe("eventHandler test ", function () {
       },
       "./utils.js": {
         getQueueName: (actionType, _details, _envVarName) => actionType,
+        isLambdaDisabled: (flag) => false
       },
     });
 
@@ -228,4 +235,33 @@ describe("eventHandler test ", function () {
     expect(result.batchItemFailures).to.be.empty;
     expect(invokedCount).equal(3);
   });
+
+  it("should return empty batchItemFailures response when lambda is disabled (featureFlag)", async () => {
+    let invokedCount = 0;
+    const lambda = proxyquire.noCallThru().load("../app/eventHandler.js", {
+      "./sqsFunctions.js": {
+        putMessages: (_sqsConfig, _actions, _isTimedOut) => {
+          invokedCount++;
+          return [];
+        },
+      },
+      "./utils.js": {
+        isLambdaDisabled: (featureFlag) => true
+      },
+      "@aws-sdk/util-dynamodb": {
+        unmarshall: (action) => action
+      },
+      "pn-action-common": {
+        ActionUtils: {
+          getQueueUrl: async () => "queueUrl"
+        }
+      }
+    });
+
+    const result = await lambda.handleEvent({ Records: [{}] }, { getRemainingTimeInMillis: () => 10000 });
+    expect(result).to.be.not.null;
+    expect(result.batchItemFailures).to.be.empty;
+    expect(invokedCount).equal(0);
+  });
+
 });
