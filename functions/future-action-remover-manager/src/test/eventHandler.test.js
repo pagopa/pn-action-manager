@@ -43,6 +43,9 @@ const testOverride = (
       isAfter,
       toString: (d) => dateToString(d),
     },
+    "./utils.js": {
+      isLambdaDisabled: () => false,
+    },
 
     "./dynamoFunctions.js": {
       getLastTimeSlotWorked: async (_unused1, _unused2) => timeslot.lastWorkedTimeslot,
@@ -84,7 +87,7 @@ const testOverride = (
   };
 };
 
-describe("eventHandler tests", () => {
+describe("eventHandler tests (lambda enabled)", () => {
 
   it("two slot with data partition", async () => {
     let timeslot = {lastWorkedTimeslot: "2024-05-22T11:57"};
@@ -277,4 +280,27 @@ describe("eventHandler tests", () => {
     expect(timeslot.lastWorkedTimeslot).to.be.equal("2024-05-22T11:59");
 
   });
+
+ 
+});
+
+describe("eventHandler tests (lambda disabled)", () => {
+
+  it("should return OK response when lambda is disabled (featureFlag)", async () => {
+    const lambda = proxyquire.noCallThru().load(
+      "../app/eventHandler.js",
+      {
+        "./utils.js": {
+          isLambdaDisabled: () => true,
+        },
+        "./dynamoFunctions.js": {},
+        "./timeHelper": {}
+      }
+    );
+
+    const result = await lambda.handleEvent(null, { getRemainingTimeInMillis: () => 10000 });
+    expect(result).to.not.be.null;
+    expect(result.statusCode).to.be.eq(200);
+  })
+
 });

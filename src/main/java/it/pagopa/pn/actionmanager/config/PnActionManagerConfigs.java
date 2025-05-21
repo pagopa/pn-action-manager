@@ -5,12 +5,9 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
-
-
 @Configuration
 @ConfigurationProperties(prefix = "pn.action-manager")
 @Data
@@ -37,5 +34,4 @@ public class PnActionManagerConfigs {
     public void init() {
         System.out.println(this);
     }
-
 }

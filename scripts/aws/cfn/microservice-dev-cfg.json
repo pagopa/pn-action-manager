@@ -22,6 +22,8 @@
     "LastPollForFutureActionDynamoTableArn": "arn:aws:dynamodb:eu-south-1:830192246553:table/pn-LastPollForFutureActionTable",
     "CdcPnActionArn": "arn:aws:kinesis:eu-south-1:830192246553:stream/pn-action-cdc",
     "CpuValue": "1024",
-    "MemoryAmount": "2GB"
+    "MemoryAmount": "2GB",
+    "ActionLambdasEnabledStart": "2099-01-01T00:00:00Z",
+    "ActionLambdasEnabledEnd": "2099-12-31T23:59:59Z"
   }
 }
