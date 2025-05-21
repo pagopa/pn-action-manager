@@ -60,4 +60,20 @@ class ActionDetailsConverterTest {
         Map<String, AttributeValue> nestedMap = result.m().get("map").m();
         assertEquals("nestedValue", nestedMap.get("nestedKey").s());
     }
+
+    @Test
+    void testTransformToReturnsNull() {
+        AttributeValue dummy = AttributeValue.builder().s("test").build();
+        assertNull(converter.transformTo(dummy));
+    }
+
+    @Test
+    void testTypeReturnsNull() {
+        assertNull(converter.type());
+    }
+
+    @Test
+    void testAttributeValueTypeReturnsNull() {
+        assertNull(converter.attributeValueType());
+    }
 }
