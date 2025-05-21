@@ -27,7 +27,7 @@ paths:
           description: Ok
         '500':
           description: Internal Server Error
-  /template/api/httpheaders:
+  /action-manager-private/api/httpheaders:
     get:
       summary: Build a map of all the Http Header for the request
       operationId: getHttpHeadersMap
