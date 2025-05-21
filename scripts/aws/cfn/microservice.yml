@@ -243,7 +243,7 @@ Resources:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_libs.zip"
       Description: NodeJs Libs layer
-      LayerName: actionEnqueuer-libs-layer
+      LayerName: actionEnqueuer-manager-libs-layer
 
   ActionEnqueuerManagerLambda:
     Type: AWS::CloudFormation::Stack
@@ -340,7 +340,7 @@ Resources:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_libs.zip"
       Description: NodeJs Libs layer
-      LayerName: actionRemover-libs-layer
+      LayerName: actionRemover-manager-libs-layer
 
   # Future Action Remover
   ActionRemoverManagerLambda:
@@ -482,7 +482,7 @@ Resources:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_libs.zip"
       Description: NodeJs Libs layer
-      LayerName: actionRouterLambda-libs-layer
+      LayerName: actionRouterLambda-manager-libs-layer
 
   ActionRouterLambda:
     Type: AWS::CloudFormation::Stack
