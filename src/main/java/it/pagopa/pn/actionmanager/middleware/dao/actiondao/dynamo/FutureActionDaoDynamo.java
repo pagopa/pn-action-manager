@@ -43,9 +43,8 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
 
         return Mono.fromFuture(() -> table.updateItem(r -> r.item(updateEntity).conditionExpression(conditionExpressionUpdate)))
                 .onErrorResume(ConditionalCheckFailedException.class, ex -> {
-                    String message = String.format("Action not found for timeSlot=%s and actionId=%s", timeSlot, actionId);
-                    log.error(message, ex);
-                    return Mono.error(new PnNotFoundException("Not found", message, ERROR_CODE_FUTURE_ACTION_NOTFOUND));
+                    log.warn("Exception code ConditionalCheckFailed on update future action, letting flow continue actionId={} ", actionId);
+                    return Mono.empty();
                 }).then();
     }
 

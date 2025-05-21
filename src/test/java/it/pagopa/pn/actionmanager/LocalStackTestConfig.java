@@ -20,7 +20,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
  * Per utilizzare questa classe, le classi di test dovranno essere annotate con
  * @Import(LocalStackTestConfig.class)
  */
-@TestConfiguration
+@TestConfiguration(proxyBeanMethods = false)
 public class LocalStackTestConfig {
 
     static LocalStackContainer localStack =

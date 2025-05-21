@@ -1,72 +1,64 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.IT;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import it.pagopa.pn.actionmanager.LocalStackTestConfig;
-import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.Action;
 import it.pagopa.pn.actionmanager.dto.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.ActionDaoDynamo;
 import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.test.StepVerifier;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import java.time.Instant;
 
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = {
+import java.util.List;
+
+@SpringBootTest(properties = {
         ActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
 })
-@SpringBootTest
 @Import(LocalStackTestConfig.class)
 class ActionDaoDynamoTestIT {
 
-    @Mock
-    private DynamoDbAsyncClient dynamoDbAsyncClient;
-    @Mock
-    private DynamoDbEnhancedAsyncClient enhancedAsyncClient;
     @Autowired
     private ActionDaoDynamo actionDaoDynamo;
-    @Mock
-    private PnActionManagerConfigs configs;
-
     @Test
-    void addOnlyActionIfAbsent_success() {
-        Action action = Action.builder()
-                .iun("IT1")
-                .actionId("A1")
-                .notBefore(Instant.now())
-                .type(ActionType.ANALOG_WORKFLOW)
+    void addOnlyActionIfAbsentFailSilent_async() {
+        Action.ActionBuilder actionBuilder = Action.builder()
+                .iun("Test_addIfAbsentFailSilent_iun01")
                 .recipientIndex(1)
-                .build();
+                .details("{\"key\":\"TEST_KEY\",\"documentCreationType\":\"AAR\",\"timelineId\":\"TEST_TIMELINE_ID\"}")
+                .type(ActionType.DIGITAL_WORKFLOW_RETRY_ACTION);
+        String actionId = "Test_addIfAbsentFailSilent_iun01_digital_workflow_e_1_timelineid_";
+        Action action = actionBuilder.actionId(actionId).build();
 
-        StepVerifier.create(actionDaoDynamo.addOnlyActionIfAbsent(action))
-                .verifyComplete();
-    }
+        Logger fooLogger = (Logger) LoggerFactory.getLogger(ActionDaoDynamo.class);
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        fooLogger.addAppender(listAppender);
 
-    @Test
-    void addOnlyActionIfAbsent_duplicate() {
-        Action action = Action.builder()
-                .iun("IT2")
-                .actionId("A2")
-                .notBefore(Instant.now())
-                .type(ActionType.ANALOG_WORKFLOW)
-                .recipientIndex(2)
-                .build();
-
-        // Prima inserzione
+        // Prima chiamata: inserisce l'azione
         StepVerifier.create(actionDaoDynamo.addOnlyActionIfAbsent(action))
                 .verifyComplete();
 
-        // Seconda inserzione (duplicato)
+        // Seconda chiamata: duplicato, deve loggare warn e non lanciare errori
         StepVerifier.create(actionDaoDynamo.addOnlyActionIfAbsent(action))
-                .verifyComplete(); // Deve completare senza errori
+                .verifyComplete();
+
+        // Verifica log
+        List<ILoggingEvent> logsList = listAppender.list;
+        Assertions.assertFalse(logsList.isEmpty());
+        Assertions.assertTrue(
+                logsList.stream().anyMatch(
+                        log -> log.getLevel() == Level.WARN &&
+                                log.getFormattedMessage().contains("Action already present in the table, actionId=" + actionId)
+                )
+        );
     }
 }

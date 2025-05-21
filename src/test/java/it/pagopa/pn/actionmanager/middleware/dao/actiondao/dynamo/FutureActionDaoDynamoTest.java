@@ -3,7 +3,6 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.Action;
 import it.pagopa.pn.actionmanager.dto.ActionType;
-import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +21,6 @@ import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -90,14 +88,9 @@ class FutureActionDaoDynamoTest {
         when(table.updateItem(any(Consumer.class)))
                 .thenReturn(CompletableFuture.failedFuture(exception));
 
-        // Act & Assert
+        // Act & Assert: ora ci si aspetta il completamento senza errori
         StepVerifier.create(dynamo.unscheduleAction(timeSlot, actionId))
-                .expectErrorSatisfies(throwable -> {
-                    assertTrue(throwable instanceof PnNotFoundException);
-                    PnNotFoundException ex = (PnNotFoundException) throwable;
-                    assertEquals("Not found", ex.getMessage());
-                })
-                .verify();
+                .verifyComplete();
     }
 
     private Action buildAction() {
