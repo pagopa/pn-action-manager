@@ -599,7 +599,7 @@ Resources:
             - !GetAtt ActionRouterLambda.Outputs.FunctionArn
         LogGroupsNames: !Join
           - ','
-          - - !Sub '/aws/ecs/${ProjectName}-delivery-push'
+          - - !Sub '/aws/ecs/${ProjectName}-action-manager'
             - !Sub '/aws/lambda/${ActionEnqueuerManagerLambdaName}'
             - !Sub '/aws/lambda/${ActionRemoverManagerLambdaName}'
             - !Sub '/aws/lambda/${ActionRouterManagerLambdaName}'
