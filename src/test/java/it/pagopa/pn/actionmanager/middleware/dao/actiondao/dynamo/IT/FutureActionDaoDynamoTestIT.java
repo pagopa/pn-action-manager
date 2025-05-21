@@ -1,59 +1,55 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.IT;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import it.pagopa.pn.actionmanager.LocalStackTestConfig;
-import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
-import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.FutureActionDaoDynamo;
-import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
 import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.test.StepVerifier;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = {
+import java.util.List;
+
+@SpringBootTest(properties = {
         FutureActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
 })
-@SpringBootTest
 @Import(LocalStackTestConfig.class)
 class FutureActionDaoDynamoTestIT {
-    @Mock
-    private DynamoDbAsyncClient dynamoDbAsyncClient;
-    @Mock
-    private DynamoDbEnhancedAsyncClient enhancedAsyncClient;
     @Autowired
     private FutureActionDaoDynamo futureActionDaoDynamo;
-    @Mock
-    private PnActionManagerConfigs pnActionManagerConfigs;
 
     @Test
-    void unscheduleAction_notFound() {
-        StepVerifier.create(futureActionDaoDynamo.unscheduleAction("not-exist", "not-exist"))
-                .expectError(PnNotFoundException.class)
-                .verify();
-    }
+    void addOnlyActionIfAbsentFailSilent_async() {
 
-    @Test
-    void unscheduleAction_success() {
-        FutureActionEntity entity = new FutureActionEntity();
-        entity.setTimeSlot("slot1");
-        entity.setActionId("act1");
-        entity.setLogicalDeleted(false);
+        String timeSlot = "2021-09-16T15:24";
+        String actionId = "Test_unscheduleActionFailSilent_actionId";
 
-        enhancedAsyncClient.table("FutureAction", TableSchema.fromClass(FutureActionEntity.class))
-                .putItem(entity).join();
+        Logger fooLogger = (Logger) LoggerFactory.getLogger(FutureActionDaoDynamo.class);
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        fooLogger.addAppender(listAppender);
 
-        StepVerifier.create(futureActionDaoDynamo.unscheduleAction("slot1", "act1"))
+        // Prima chiamata: inserisce l'azione
+        StepVerifier.create(futureActionDaoDynamo.unscheduleAction(timeSlot, actionId))
                 .verifyComplete();
+
+        // Seconda chiamata: duplicato, deve loggare warn e non lanciare errori
+        StepVerifier.create(futureActionDaoDynamo.unscheduleAction(timeSlot, actionId))
+                .verifyComplete();
+
+        // Verifica log
+        List<ILoggingEvent> logsList = listAppender.list;
+
+        String expectedMessage = "Exception code ConditionalCheckFailed on update future action, letting flow continue actionId=" + actionId;
+        Assertions.assertEquals(expectedMessage, logsList.get(0).getFormattedMessage().trim());
+        Assertions.assertEquals(Level.WARN, logsList.get(0).getLevel());
     }
 }

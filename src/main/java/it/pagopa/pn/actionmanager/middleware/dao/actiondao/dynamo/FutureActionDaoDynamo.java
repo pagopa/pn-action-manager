@@ -1,7 +1,6 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
-import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
 import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
@@ -15,8 +14,6 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
-
-import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCodes.ERROR_CODE_FUTURE_ACTION_NOTFOUND;
 
 @Component
 @Slf4j
@@ -43,9 +40,8 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
 
         return Mono.fromFuture(() -> table.updateItem(r -> r.item(updateEntity).conditionExpression(conditionExpressionUpdate)))
                 .onErrorResume(ConditionalCheckFailedException.class, ex -> {
-                    String message = String.format("Action not found for timeSlot=%s and actionId=%s", timeSlot, actionId);
-                    log.error(message, ex);
-                    return Mono.error(new PnNotFoundException("Not found", message, ERROR_CODE_FUTURE_ACTION_NOTFOUND));
+                    log.warn("Exception code ConditionalCheckFailed on update future action, letting flow continue actionId={} ", actionId);
+                    return Mono.empty();
                 }).then();
     }
 
