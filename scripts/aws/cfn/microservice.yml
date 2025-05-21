@@ -213,27 +213,6 @@ Resources:
         EcsLogGroup: !Ref EcsLogGroup
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
 
-  # Dashboard for ActionManager
-  ActionManagerMicroserviceCloudWatchDashboard:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
-      Parameters:
-        DashboardName: !Sub "${ProjectName}-action-manager"
-        DynamoDBTableNames: !Join
-          - ','
-          - - !Ref ActionDynamoTableName
-            - !Ref FutureActionDynamoTableName
-        AlarmArns: !Join
-          - ','
-          - - !Ref ActionRouterManagerDLQARN
-            - !Ref ActionEnqueuerManagerDLQAlarmARN
-            - !Ref ActionTimeoutErrorDLQAlarmARN
-            - !Ref ActionRouterManagerAlarmARN
-        QueueArns: !Join
-          - ','
-          - - !Ref ScheduledActionsQueueARN
-            - !Ref ScheduledValidationActionsQueueARN
 
   # CDC To ActionEnqueuer
   ActionEnqueuerManagerKinesisSource:
@@ -591,3 +570,37 @@ Resources:
               - "dynamodb:BatchWriteItem"
             Resource:
               - !Ref FutureActionDynamoTableArn
+
+  # Dashboard for ActionManager
+  ActionManagerMicroserviceCloudWatchDashboard:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
+      Parameters:
+        DashboardName: !Sub "${ProjectName}-action-manager"
+        DynamoDBTableNames: !Join
+          - ','
+          - - !Ref ActionDynamoTableName
+            - !Ref FutureActionDynamoTableName
+        AlarmArns: !Join
+          - ','
+          - - !Ref ActionRouterManagerDLQARN
+            - !Ref ActionEnqueuerManagerDLQAlarmARN
+            - !Ref ActionTimeoutErrorDLQAlarmARN
+            - !Ref ActionRouterManagerAlarmARN
+        QueueArns: !Join
+          - ','
+          - - !Ref ScheduledActionsQueueARN
+            - !Ref ScheduledValidationActionsQueueARN
+        LambdaArns: !Join
+          - ","
+          - - !GetAtt ActionEnqueuerManagerLambda.Outputs.FunctionArn
+            - !GetAtt ActionRemoverManagerLambda.Outputs.FunctionArn
+            - !GetAtt ActionRouterLambda.Outputs.FunctionArn
+        LogGroupsNames: !Join
+          - ','
+          - - !Sub '/aws/ecs/${ProjectName}-delivery-push'
+            - !Sub '/aws/lambda/${ActionEnqueuerManagerLambdaName}'
+            - !Sub '/aws/lambda/${ActionRemoverManagerLambdaName}'
+            - !Sub '/aws/lambda/${ActionRouterLambdaName}'
+
