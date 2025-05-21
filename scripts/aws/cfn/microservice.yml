@@ -37,6 +37,15 @@ Parameters:
     Default: ''
     Description: 'Name of the bucket where the microservice files are copied during deploy'
 
+  MicroserviceBucketBaseKey:
+    Type: String
+    Default: ''
+    Description: 'Base key of the microservice in the s3 bucket'
+
+  ContainerImageUri:
+    Type: String
+    Description: 'Exact container image URI with full repository and image digest'
+
   ActionQueueMap:
     Type: String
     Description: 'Define relation from actionType to sqs queue name'
@@ -175,6 +184,14 @@ Parameters:
     Type: String
     Default: 'FATAL'
 
+  ActionLambdasEnabledStart:
+    Type: String
+    Description: 'Enable action lambdas start'
+
+  ActionLambdasEnabledEnd:
+    Type: String
+    Description: 'Enable action lambdas end'
+
 Resources:
 
   # PN-action-manager microservice
@@ -273,11 +290,13 @@ Resources:
         RoleArn: !GetAtt ActionEnqueuerManagerLambdaRole.Arn
         Layer1: !Ref ActionEnqueuerManagerLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}",
+          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
           {
             actionQueueMap: !Ref ActionQueueMap,
             QueueUrlMap: !Ref QueueUrlMap,
-            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
+            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL,
+            LambdaEnabledStart: !Ref ActionLambdasEnabledStart,
+            LambdaEnabledEnd: !Ref ActionLambdasEnabledEnd
           }
         ]
 
@@ -285,7 +304,7 @@ Resources:
   ActionEnqueuerManagerLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${ProjectName}-actionEnqueuerLambdaRole
+      RoleName: !Sub ${ProjectName}-actionEnqueuerManagerLambdaRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -368,14 +387,20 @@ Resources:
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRemoverManagerLambdaRole.Arn
         Layer1: !Ref ActionRemoverManagerLambdaLibrariesLayer
-        EnvVariables: "LAST_WORKED_KEY=2"
+        EnvVariables: !Sub [
+          "LAST_WORKED_KEY=2###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
+          {
+            LambdaEnabledStart: !Ref ActionLambdasEnabledStart,
+            LambdaEnabledEnd: !Ref ActionLambdasEnabledEnd
+          }
+        ]
 
 
   # Lambda function role
   ActionRemoverManagerLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${ProjectName}-actionRemoverLambdaRole
+      RoleName: !Sub ${ProjectName}-actionRemoverManagerLambdaRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -392,7 +417,7 @@ Resources:
   ActionRemoverManagerLambdaPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ${ProjectName}-ActionRemoverLambdaPolicy
+      PolicyName: !Sub ${ProjectName}-ActionRemoverManagerLambdaPolicy
       Roles:
         - !Ref ActionRemoverManagerLambdaRole
       PolicyDocument:
@@ -475,7 +500,6 @@ Resources:
       MaximumRetryAttempts: 5
       StartingPosition: TRIM_HORIZON
 
-
   ActionRouterLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
@@ -504,22 +528,23 @@ Resources:
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRouterLambdaRole.Arn
         Layer1: !Ref ActionRouterLambdaLibrariesLayer
-        EnvVariables:
-          !Sub [
-            "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}",
-            {
-              actionQueueMap: !Ref ActionQueueMap,
-              QueueUrlMap: !Ref QueueUrlMap,
-              FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
-              ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
-            },
-          ]
+        EnvVariables: !Sub [
+          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
+          {
+            actionQueueMap: !Ref ActionQueueMap,
+            QueueUrlMap: !Ref QueueUrlMap,
+            FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
+            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL,
+            LambdaEnabledStart: !Ref ActionLambdasEnabledStart,
+            LambdaEnabledEnd: !Ref ActionLambdasEnabledEnd
+          }
+        ]
 
   # Lambda function role
   ActionRouterLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${ProjectName}-actionRouterLambdaRole
+      RoleName: !Sub ${ProjectName}-actionRouterManagerLambdaRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -536,7 +561,7 @@ Resources:
   ActionRouterLambdaPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ${ProjectName}-ActionRouterLambdaPolicy
+      PolicyName: !Sub ${ProjectName}-ActionRouterManagerLambdaPolicy
       Roles:
         - !Ref ActionRouterLambdaRole
       PolicyDocument:

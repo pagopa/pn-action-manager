@@ -6,8 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import jakarta.annotation.PostConstruct;
-
-
 @Configuration
 @ConfigurationProperties(prefix = "pn.action-manager")
 @Data
@@ -34,5 +32,4 @@ public class PnActionManagerConfigs {
     public void init() {
         System.out.println(this);
     }
-
 }

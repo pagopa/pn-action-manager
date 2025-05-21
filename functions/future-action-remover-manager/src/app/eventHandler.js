@@ -13,6 +13,8 @@ const {
   batchDelete,
 } = require("./dynamoFunctions.js");
 
+const { isLambdaDisabled } = require("./utils.js");
+
 const { BatchOperationException, InvalidItemException } = require("./exceptions.js");
 const config = require("config");
 
@@ -24,6 +26,13 @@ const isTimeToLeave = (context) =>
 
 async function handleEvent(event, context) {
   console.log("[FUTURE_ACTIONS_REMOVER]", "Started");
+
+  // Controllo se la lambda è disabilitata
+  const featureFlag = config.get("featureFlag");
+  if (isLambdaDisabled(featureFlag)) {
+    console.warn("Lambda disabled. Flow interrupted.");
+    return generateOkResponse(false);
+  }
 
   let lastPollTable = config.get("LAST_POLL_TABLE_NAME");
   let futureActionTable = config.get("FUTURE_TABLE_NAME");

@@ -22,7 +22,8 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
         var date = new Date();
         let isoDateNow = date.toISOString();
         return isoDateNow < notBefore;
-      }
+      },
+      isLambdaDisabled: (featureFlag) => false
     },
 
     "./sqs/writeToSqs.js": {
@@ -69,7 +70,7 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
     },
 });
 
-describe("eventHandlerTest", function () {
+describe("eventHandlerTest (lambda enabled)", function () {
   let queueAction1Url = "https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions1";
   let queueAction2Url = "https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions2";
 
@@ -261,6 +262,25 @@ describe("eventHandlerTest", function () {
     //Viene verificato che sia stata inviata la sola azione attesa futureAction1Data
     checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue);
   });
+});
+
+describe("eventHandlerTest (lambda disabled)", function () {
+  it("should return OK response when lambda is disabled (featureFlag)", async () => {
+    const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
+      "./utils/utils.js": {
+        isLambdaDisabled: (featureFlag) => true
+      }
+    });
+    
+    const res = await eventHandler.handleEvent({}, {});
+
+    //THEN
+    //Viene verificato che non ci siano item per la quale la put su dynamo o in coda sia fallita
+    expect(res).deep.equals({
+      batchItemFailures: [],
+    });
+  });
+  
 });
 
 function checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue, actionToQueueNameMap, queueNameMapToQueueUrlMap){
