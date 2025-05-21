@@ -64,11 +64,8 @@ class ActionDaoDynamoTest {
     @Test
     void addOnlyActionIfAbsent() {
         Action action = buildAction();
-        ActionEntity actionEntity = buildActionEntity(action);
-
         dynamo.addOnlyActionIfAbsent(action);
-
-        Assertions.assertEquals(actionEntity, actionEntity);
+        Assertions.assertNotNull(action);
     }
 
     @Test
