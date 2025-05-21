@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Microservice deploy for pn-action-manager'
+Description: 'Example microservice deploy'
+Transform:
+  - UpdateDeploymentTransform
 
 Parameters:
   ProjectName:
@@ -202,7 +204,7 @@ Resources:
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         MappedPaths: 'action-manager-private/*'
         ECSClusterName: !Ref ECSClusterName
-        Subnets: !Ref SubnetsIds
+        Subnets: !Join [ ',', !Ref SubnetsIds ]
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
