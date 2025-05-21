@@ -14,5 +14,5 @@ class TimeoutException extends Error {
 
 module.exports = {
   SQSServiceException,
-  TimeoutException,
+  TimeoutException
 };
