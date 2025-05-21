@@ -602,5 +602,5 @@ Resources:
           - - !Sub '/aws/ecs/${ProjectName}-delivery-push'
             - !Sub '/aws/lambda/${ActionEnqueuerManagerLambdaName}'
             - !Sub '/aws/lambda/${ActionRemoverManagerLambdaName}'
-            - !Sub '/aws/lambda/${ActionRouterLambdaName}'
+            - !Sub '/aws/lambda/${ActionRouterManagerLambdaName}'
 
