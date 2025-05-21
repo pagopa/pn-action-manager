@@ -39,8 +39,7 @@ class ActionDaoDynamoTestIT{
                 .iun("Test_addIfAbsentFailSilent_iun01")
                 .recipientIndex(1)
                 .type(ActionType.DIGITAL_WORKFLOW_RETRY_ACTION);
-        String actionId = ActionType.DIGITAL_WORKFLOW_NEXT_ACTION.buildActionId(
-                actionBuilder.build());
+        String actionId = "Test_addIfAbsentFailSilent_iun01_digital_workflow_e_1_timelineid_";
 
         Action action = actionBuilder.actionId(actionId).build();
 
