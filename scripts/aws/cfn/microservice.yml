@@ -446,7 +446,7 @@ Resources:
       Description: "Schedule Action Remover every minute"
       FlexibleTimeWindow:
         Mode: "OFF"
-      Name: "ActionRemoverShedule"
+      Name: "ActionRemoverManagerShedule"
       ScheduleExpression: "rate(1 minutes)"
       State: ENABLED
       Target:
@@ -571,10 +571,10 @@ Resources:
             Resource:
               - !Ref FutureActionDynamoTableArn
 
-  # Dashboard for ActionManager
- # ActionManagerMicroserviceCloudWatchDashboard:
-    #   Type: AWS::CloudFormation::Stack
-      #  Properties:
+# Dashboard for ActionManager
+# ActionManagerMicroserviceCloudWatchDashboard:
+#   Type: AWS::CloudFormation::Stack
+#  Properties:
       #  TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
         #  Parameters:
         #   DashboardName: !Sub "${ProjectName}-action-manager"
