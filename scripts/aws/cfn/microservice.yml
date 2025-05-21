@@ -297,7 +297,7 @@ Resources:
   ActionEnqueuerManagerLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${ProjectName}-actionEnqueuerLambdaRole
+      RoleName: !Sub ${ProjectName}-actionEnqueuerManagerLambdaRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -393,7 +393,7 @@ Resources:
   ActionRemoverManagerLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${ProjectName}-actionRemoverLambdaRole
+      RoleName: !Sub ${ProjectName}-actionRemoverManagerLambdaRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -410,7 +410,7 @@ Resources:
   ActionRemoverManagerLambdaPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ${ProjectName}-ActionRemoverLambdaPolicy
+      PolicyName: !Sub ${ProjectName}-ActionRemoverManagerLambdaPolicy
       Roles:
         - !Ref ActionRemoverManagerLambdaRole
       PolicyDocument:
@@ -493,7 +493,6 @@ Resources:
       MaximumRetryAttempts: 5
       StartingPosition: TRIM_HORIZON
 
-
   ActionRouterLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
@@ -538,7 +537,7 @@ Resources:
   ActionRouterLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${ProjectName}-actionRouterLambdaRole
+      RoleName: !Sub ${ProjectName}-actionRouterManagerLambdaRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -555,7 +554,7 @@ Resources:
   ActionRouterLambdaPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ${ProjectName}-ActionRouterLambdaPolicy
+      PolicyName: !Sub ${ProjectName}-ActionRouterManagerLambdaPolicy
       Roles:
         - !Ref ActionRouterLambdaRole
       PolicyDocument:
