@@ -1,13 +1,13 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper;
 
-import it.pagopa.pn.actionmanager.dto.action.Action;
-import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.dto.Action;
+import it.pagopa.pn.actionmanager.dto.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.Map;
 
 class DtoToEntityFutureActionMapperTest {
 
@@ -28,6 +28,7 @@ class DtoToEntityFutureActionMapperTest {
                 .timeslot("2021-09-16T15:24:00.00Z")
                 .notBefore(instant)
                 .recipientIndex(1)
+                .details("{\"key\":\"value\"}")
                 .type(ActionType.ANALOG_WORKFLOW)
                 .timelineId("2021-09-16T15:24:00.00Z")
                 .build();
@@ -42,6 +43,7 @@ class DtoToEntityFutureActionMapperTest {
                 .notBefore(instant)
                 .recipientIndex(1)
                 .type(ActionType.ANALOG_WORKFLOW)
+                .details(Map.of("key", "value"))
                 .timelineId("2021-09-16T15:24:00.00Z")
                 .timeSlot("2021-09-16T15:24:00.00Z")
                 .build();

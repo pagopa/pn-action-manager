@@ -20,6 +20,10 @@ public class PnActionManagerConfigs {
 
     private String actionTtlDays;
 
+    private int maxSizeBytes;
+
+    private int maxDepth;
+
     @Data
     public static class ActionDao {
         private String tableName;

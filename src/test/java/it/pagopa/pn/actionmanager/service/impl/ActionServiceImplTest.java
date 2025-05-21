@@ -1,10 +1,12 @@
 package it.pagopa.pn.actionmanager.service.impl;
 
 
-import it.pagopa.pn.actionmanager.dto.action.Action;
-import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
+import it.pagopa.pn.actionmanager.dto.Action;
+import it.pagopa.pn.actionmanager.dto.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
+import it.pagopa.pn.actionmanager.utils.JsonValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,11 +26,16 @@ class ActionServiceImplTest {
     private FutureActionDao futureActionDao;
 
     private ActionServiceImpl actionService;
+    @Mock
+    private PnActionManagerConfigs pnActionManagerConfigs;
+
+    @Mock
+    private JsonValidationUtils jsonValidationUtils;
 
     @BeforeEach
     public void setup() {
         actionDao = Mockito.mock(ActionDao.class);
-        actionService = new ActionServiceImpl(actionDao, futureActionDao);
+        actionService = new ActionServiceImpl(actionDao, futureActionDao, pnActionManagerConfigs);
     }
 
     @Test
@@ -50,7 +57,6 @@ class ActionServiceImplTest {
         Action expectedAction = action.toBuilder()
                 .timeslot(expectedTimeSlot)
                 .build();
-
         actionService.addOnlyActionIfAbsent(action);
 
         // Verifica che il DAO sia stato chiamato con l'oggetto corretto

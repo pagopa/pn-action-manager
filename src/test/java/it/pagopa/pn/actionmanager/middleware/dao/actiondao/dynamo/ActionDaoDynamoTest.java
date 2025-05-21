@@ -1,8 +1,9 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
-import it.pagopa.pn.actionmanager.dto.action.Action;
-import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.dto.Action;
+import it.pagopa.pn.actionmanager.dto.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
 import org.junit.jupiter.api.Assertions;
@@ -20,6 +21,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.when;
@@ -62,7 +64,7 @@ class ActionDaoDynamoTest {
     }
 
     @Test
-    void addOnlyActionIfAbsent() {
+    void addOnlyActionIfAbsent() throws JsonProcessingException {
         Action action = buildAction();
         ActionEntity actionEntity = buildActionEntity(action);
 
@@ -96,6 +98,7 @@ class ActionDaoDynamoTest {
                 .notBefore(instant)
                 .type(ActionType.ANALOG_WORKFLOW)
                 .recipientIndex(3)
+                .details("{\"key\":\"value\"}")
                 .build();
     }
 
@@ -105,6 +108,7 @@ class ActionDaoDynamoTest {
                 .notBefore(dto.getNotBefore())
                 .recipientIndex(dto.getRecipientIndex())
                 .type(dto.getType())
+                .details(Map.of())
                 .iun(dto.getIun());
         return builder.build();
     }

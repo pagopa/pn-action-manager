@@ -1,8 +1,8 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
-import it.pagopa.pn.actionmanager.dto.action.Action;
-import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.dto.Action;
+import it.pagopa.pn.actionmanager.dto.ActionType;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;

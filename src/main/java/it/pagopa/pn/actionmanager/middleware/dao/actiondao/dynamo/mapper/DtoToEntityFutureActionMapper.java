@@ -1,12 +1,10 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper;
 
-
-import it.pagopa.pn.actionmanager.dto.action.Action;
-import it.pagopa.pn.actionmanager.dto.action.ActionDetails;
-import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionDetailsEntity;
+import it.pagopa.pn.actionmanager.dto.Action;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
-
 import it.pagopa.pn.actionmanager.service.mapper.SmartMapper;
+
+import java.util.Map;
 
 public class DtoToEntityFutureActionMapper {
     private DtoToEntityFutureActionMapper() {
@@ -26,7 +24,7 @@ public class DtoToEntityFutureActionMapper {
         return builder.build();
     }
     
-    private static ActionDetailsEntity dtoToDetailsEntity(ActionDetails details) {
-      return SmartMapper.mapToClass(details, ActionDetailsEntity.class );
+    private static Map<String, Object> dtoToDetailsEntity(String details) {
+      return SmartMapper.mapFromStringToMap(details );
     }
 }

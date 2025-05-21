@@ -1,11 +1,14 @@
 package it.pagopa.pn.actionmanager.service.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 
 @Slf4j
@@ -13,28 +16,14 @@ import org.springframework.stereotype.Component;
 @Data
 @NoArgsConstructor
 public class SmartMapper {
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private static ModelMapper modelMapper;
-
-    static{
-        modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
-
-    /*
-        Mapping effettuato per la modifica dei timestamp per gli
-        elementi di timeline che implementano l'interfaccia ElementTimestampTimelineElementDetails
-     */
-    public static  <S,T> T mapToClass(S source, Class<T> destinationClass ){
-        T result;
-        if( source != null) {
-            result = modelMapper.map(source, destinationClass );
-        } else {
-            result = null;
+    public static Map<String, Object> mapFromStringToMap(String source) {
+        try {
+            return objectMapper.readValue(source, new TypeReference<>() {});
+        } catch (JsonProcessingException e) {
+            log.error("Error in JSON = {} deserialization", source);
+            throw new IllegalArgumentException("Error in JSON deserialization", e);
         }
-        return result;
     }
-
-
-
 }

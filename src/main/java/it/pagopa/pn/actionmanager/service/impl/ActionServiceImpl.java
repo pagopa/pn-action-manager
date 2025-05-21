@@ -1,10 +1,12 @@
 package it.pagopa.pn.actionmanager.service.impl;
 
 
-import it.pagopa.pn.actionmanager.dto.action.Action;
+import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
+import it.pagopa.pn.actionmanager.dto.Action;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.service.ActionService;
+import it.pagopa.pn.actionmanager.utils.JsonValidationUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.time.ZoneOffset;
 public class ActionServiceImpl implements ActionService {
     private final ActionDao actionDao;
     private final FutureActionDao futureActionDao;
+    private final PnActionManagerConfigs pnActionManagerConfigs;
 
     @Override
     public Mono<Void> addOnlyActionIfAbsent(Action action) {
@@ -27,6 +30,7 @@ public class ActionServiceImpl implements ActionService {
         action = action.toBuilder()
                 .timeslot( timeSlot)
                 .build();
+        JsonValidationUtils.validateJsonString(action.getDetails(), pnActionManagerConfigs.getMaxSizeBytes(),pnActionManagerConfigs.getMaxDepth());
         return actionDao.addOnlyActionIfAbsent(action);
     }
 

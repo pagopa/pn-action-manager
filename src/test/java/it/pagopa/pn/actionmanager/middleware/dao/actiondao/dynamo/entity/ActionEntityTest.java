@@ -1,7 +1,7 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity;
 
 
-import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.dto.ActionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

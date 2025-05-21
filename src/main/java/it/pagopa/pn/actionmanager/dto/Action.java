@@ -1,4 +1,4 @@
-package it.pagopa.pn.actionmanager.dto.action;
+package it.pagopa.pn.actionmanager.dto;
 
 import lombok.*;
 
@@ -29,5 +29,5 @@ public class Action {
 
     private String timeslot;
 
-    private ActionDetails details;
+    private String details;
 }
