@@ -1,6 +1,5 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.Action;
 import it.pagopa.pn.actionmanager.dto.ActionType;
@@ -64,7 +63,7 @@ class ActionDaoDynamoTest {
     }
 
     @Test
-    void addOnlyActionIfAbsent() throws JsonProcessingException {
+    void addOnlyActionIfAbsent() {
         Action action = buildAction();
         ActionEntity actionEntity = buildActionEntity(action);
 

@@ -1,6 +1,5 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.Action;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
@@ -12,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 

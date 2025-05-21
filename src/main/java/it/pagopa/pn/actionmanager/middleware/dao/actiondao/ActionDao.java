@@ -1,6 +1,5 @@
 package it.pagopa.pn.actionmanager.middleware.dao.actiondao;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.actionmanager.dto.Action;
 import reactor.core.publisher.Mono;
 
