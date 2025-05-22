@@ -25,6 +25,9 @@
     "CpuValue": "1024",
     "MemoryAmount": "2GB",
     "ActionLambdasEnabledStart": "2099-01-01T00:00:00Z",
-    "ActionLambdasEnabledEnd": "2099-12-31T23:59:59Z"
+    "ActionLambdasEnabledEnd": "2099-12-31T23:59:59Z",
+    "PnCronAnalyzer": "* */1 * * * *",
+    "WireTapLogActivation": "false",
+    "MountEfs": "false"
   }
 }
