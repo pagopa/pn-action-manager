@@ -1,11 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Microservice deploy for pn-action-manager'
+Description: 'Example microservice deploy'
+Transform:
+  - UpdateDeploymentTransform
 
 Parameters:
   ProjectName:
     Type: String
-    Description: 'Usually pn can be pnXYZ where XYZ are the feature number, 
-    useful to create experimental environments without crash official development environment'
+    Description: ''
 
   TemplateBucketBaseUrl:
     Type: String
@@ -198,12 +199,14 @@ Resources:
         MicroServiceUniqueName: !Sub '${ProjectName}-action-manager'
         CpuValue: !Ref CpuValue
         MemoryAmount: !Ref MemoryAmount
+        HealthCheckPath: /actuator/health
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
-        MappedPaths: 'action-manager-private/*'
+        MappedPaths: '/action-manager-private/*'
         ECSClusterName: !Ref ECSClusterName
-        Subnets: !Ref SubnetsIds
+        Subnets: !Join [ ',', !Ref SubnetsIds ]
+        AutoscalingStrategy: REST-API
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
@@ -212,27 +215,6 @@ Resources:
         EcsLogGroup: !Ref EcsLogGroup
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
 
-  # Dashboard for ActionManager
-  ActionManagerMicroserviceCloudWatchDashboard:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
-      Parameters:
-        DashboardName: !Sub "${ProjectName}-action-manager"
-        DynamoDBTableNames: !Join
-          - ','
-          - - !Ref ActionDynamoTableName
-            - !Ref FutureActionDynamoTableName
-        AlarmArns: !Join
-          - ','
-          - - !Ref ActionRouterManagerDLQARN
-            - !Ref ActionEnqueuerManagerDLQAlarmARN
-            - !Ref ActionTimeoutErrorDLQAlarmARN
-            - !Ref ActionRouterManagerAlarmARN
-        QueueArns: !Join
-          - ','
-          - - !Ref ScheduledActionsQueueARN
-            - !Ref ScheduledValidationActionsQueueARN
 
   # CDC To ActionEnqueuer
   ActionEnqueuerManagerKinesisSource:
@@ -263,7 +245,7 @@ Resources:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_libs.zip"
       Description: NodeJs Libs layer
-      LayerName: actionEnqueuer-libs-layer
+      LayerName: actionEnqueuer-manager-libs-layer
 
   ActionEnqueuerManagerLambda:
     Type: AWS::CloudFormation::Stack
@@ -360,7 +342,7 @@ Resources:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_libs.zip"
       Description: NodeJs Libs layer
-      LayerName: actionRemover-libs-layer
+      LayerName: actionRemover-manager-libs-layer
 
   # Future Action Remover
   ActionRemoverManagerLambda:
@@ -466,7 +448,7 @@ Resources:
       Description: "Schedule Action Remover every minute"
       FlexibleTimeWindow:
         Mode: "OFF"
-      Name: "ActionRemoverShedule"
+      Name: "ActionRemoverManagerShedule"
       ScheduleExpression: "rate(1 minutes)"
       State: ENABLED
       Target:
@@ -502,7 +484,7 @@ Resources:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_libs.zip"
       Description: NodeJs Libs layer
-      LayerName: actionRouterLambda-libs-layer
+      LayerName: actionRouterLambda-manager-libs-layer
 
   ActionRouterLambda:
     Type: AWS::CloudFormation::Stack
@@ -590,3 +572,6 @@ Resources:
               - "dynamodb:BatchWriteItem"
             Resource:
               - !Ref FutureActionDynamoTableArn
+
+
+
