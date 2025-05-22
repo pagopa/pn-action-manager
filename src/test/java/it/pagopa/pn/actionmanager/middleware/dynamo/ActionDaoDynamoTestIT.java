@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import it.pagopa.pn.actionmanager.LocalStackTestConfig;
+import it.pagopa.pn.actionmanager.config.BaseTest;
 import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
@@ -22,18 +23,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-@ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
         ActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
 })
-@SpringBootTest
-@Import(LocalStackTestConfig.class)
-class ActionDaoDynamoTestIT{
+class ActionDaoDynamoTestIT extends BaseTest.WithLocalStack{
     @Autowired
     private ActionDao actionDao;
 
     @Test
-    @ExtendWith(SpringExtension.class)
     void addOnlyActionIfAbsentFailSilent() {
         Action.ActionBuilder actionBuilder = Action.builder()
                 .iun("Test_addIfAbsentFailSilent_iun01")

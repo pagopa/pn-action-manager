@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import it.pagopa.pn.actionmanager.LocalStackTestConfig;
+import it.pagopa.pn.actionmanager.config.BaseTest;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.FutureActionDaoDynamo;
@@ -21,18 +22,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-@ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
         FutureActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
 })
-@SpringBootTest
-@Import(LocalStackTestConfig.class)
-class FutureActionDaoDynamoTestIT {
+class FutureActionDaoDynamoTestIT extends BaseTest.WithLocalStack{
     @Autowired
     private FutureActionDao futureActionDao;
 
     @Test
-    @ExtendWith(SpringExtension.class)
     void unscheduleActionFailSilent() {
         String timeSlot = "2021-09-16T15:24";
         String actionId = "Test_unscheduleActionFailSilent_actionId";
