@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 
@@ -40,10 +41,8 @@ class FutureActionDaoDynamoTestIT extends BaseTest.WithLocalStack {
         ((ch.qos.logback.classic.Logger) fooLogger).addAppender(listAppender);
 
         // Prova a disschedulare un'azione non esistente
-        Assertions.assertThrows(
-                PnNotFoundException.class,
-                () -> futureActionDao.unscheduleAction(timeSlot, actionId)
-        );
+        StepVerifier.create(futureActionDao.unscheduleAction(timeSlot, actionId))
+                .verifyError(PnNotFoundException.class);
 
         // Recupera i log registrati
         List<ILoggingEvent> logsList = listAppender.list;
