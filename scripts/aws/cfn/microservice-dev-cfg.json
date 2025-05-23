@@ -17,6 +17,7 @@
     "ScheduledActionsQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-delivery_push_actions",
     "ScheduledValidationActionsQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-delivery_push_validation_actions",
     "ActionDynamoTableName": "pn-Action",
+    "ActionDynamoTableArn": "arn:aws:dynamodb:eu-south-1:830192246553:table/pn-Action",
     "FutureActionDynamoTableName": "pn-FutureAction",
     "FutureActionDynamoTableArn": "arn:aws:dynamodb:eu-south-1:830192246553:table/pn-FutureAction",
     "LastPollForFutureActionDynamoTableArn": "arn:aws:dynamodb:eu-south-1:830192246553:table/pn-LastPollForFutureActionTable",
