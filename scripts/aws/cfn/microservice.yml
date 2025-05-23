@@ -220,7 +220,24 @@ Resources:
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         EcsLogGroup: !Ref EcsLogGroup
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
+        TaskRoleManagedPolicyArn: !Ref ActionManagerTaskManagedPolicy
 
+  ActionManagerTaskManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "dynamodb:PutItem"
+            Resource:
+              - !Ref ActionDynamoTableArn
+          - Effect: Allow
+            Action:
+              - "dynamodb:UpdateItem"
+            Resource:
+              - !Ref FutureActionDynamoTableArn
 
   # CDC To ActionEnqueuer
   ActionEnqueuerManagerKinesisSource:
@@ -577,19 +594,4 @@ Resources:
               - "dynamodb:PutItem"
               - "dynamodb:BatchWriteItem"
             Resource:
-              - !Ref FutureActionDynamoTableArn
-
-  ActionManagerPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub ${ProjectName}-ActionManagerPolicy
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Action:
-              - "dynamodb:PutItem"
-              - "dynamodb:UpdateItem"
-            Resource:
-              - !Ref ActionDynamoTableArn
               - !Ref FutureActionDynamoTableArn
