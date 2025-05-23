@@ -44,7 +44,7 @@ class ActionServiceImplTest {
                 .verifyComplete();
 
         // Verifica che il DAO sia stato chiamato con l'oggetto corretto
-        Mockito.verify(futureActionDao, Mockito.times(1)).unscheduleAction(Mockito.eq(timeSlot), Mockito.eq(actionId));
+        Mockito.verify(futureActionDao, Mockito.times(1)).unscheduleAction(timeSlot, actionId);
     }
 
     @Test
