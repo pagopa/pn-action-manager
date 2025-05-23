@@ -24,6 +24,7 @@ import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCode
 public class FutureActionDaoDynamo  implements FutureActionDao {
     private final DynamoDbAsyncTable<FutureActionEntity> table;
 
+
     protected FutureActionDaoDynamo(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient, PnActionManagerConfigs cfg) {
         this.table = dynamoDbEnhancedAsyncClient.table(cfg.getFutureActionDao().getTableName(), TableSchema.fromClass(FutureActionEntity.class));
     }
@@ -32,7 +33,6 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
     public Mono<Void> unscheduleAction(String timeSlot, String actionId) {
         String keyConditionExpression = String.format("%s = :timeSlot AND %s = :actionId",
                 FutureActionEntity.FIELD_TIME_SLOT, FutureActionEntity.FIELD_ACTION_ID);
-
         Expression conditionExpressionUpdate = Expression.builder()
                 .expression(keyConditionExpression)
                 .putExpressionValue(":timeSlot", AttributeValue.builder().s(timeSlot).build())
@@ -40,7 +40,7 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
                 .build();
 
         FutureActionEntity updateEntity = getFutureActionEntity(timeSlot, actionId);
-        return Mono.fromFuture(() -> table.updateItem(r -> r.item(updateEntity).conditionExpression(conditionExpressionUpdate)))
+        return Mono.fromFuture(() -> table.updateItem(r -> r.item(updateEntity).conditionExpression(conditionExpressionUpdate).ignoreNulls(true)))
                 .onErrorResume(ConditionalCheckFailedException.class, ex -> {
                     String message = String.format("Exception code ConditionalCheckFailed on update future action, letting flow continue actionId=%s", actionId);
                     log.error(message, ex);
@@ -52,6 +52,7 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
         FutureActionEntity updateEntity = new FutureActionEntity();
         updateEntity.setTimeSlot(timeSlot);
         updateEntity.setLogicalDeleted(true);
+
         updateEntity.setActionId(actionId);
         return updateEntity;
     }
