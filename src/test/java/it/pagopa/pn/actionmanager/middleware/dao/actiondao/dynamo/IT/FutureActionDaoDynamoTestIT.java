@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import it.pagopa.pn.actionmanager.LocalStackTestConfig;
+import it.pagopa.pn.actionmanager.config.BaseTest;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.FutureActionDaoDynamo;
 import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
@@ -12,22 +12,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
 
 import java.util.List;
 
-@SpringBootTest(properties = {
+@TestPropertySource(properties = {
         FutureActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
 })
-@Import(LocalStackTestConfig.class)
-class FutureActionDaoDynamoTestIT {
+class FutureActionDaoDynamoTestIT extends BaseTest.WithLocalStack{
     @Autowired
     private FutureActionDaoDynamo futureActionDaoDynamo;
 
     @Test
-    void addOnlyActionIfAbsentFailSilent_async() {
+    void unscheduleActionFailSilent_async() {
 
         String timeSlot = "2021-09-16T15:24";
         String actionId = "Test_unscheduleActionFailSilent_actionId";
