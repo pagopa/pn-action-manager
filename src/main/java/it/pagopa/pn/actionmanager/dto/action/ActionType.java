@@ -48,8 +48,4 @@ public enum ActionType {
         this.detailsJavaClass = detailsJavaClass;
     }
 
-    public String buildActionId(Action action) {
-        throw new UnsupportedOperationException("Must be implemented for each action type");
-    }
-
 }
