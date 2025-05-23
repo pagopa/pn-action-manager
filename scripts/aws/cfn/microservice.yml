@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Example microservice deploy'
+Description: 'Microservice deploy for pn-action-manager'
 Transform:
   - UpdateDeploymentTransform
 
@@ -81,6 +81,10 @@ Parameters:
 
   ActionRemoverManagerLambdaName:
     Type: String
+
+  ActionDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing'
 
   LastPollForFutureActionDynamoTableArn:
     Type: String
@@ -203,6 +207,8 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
+        ContainerEnvEntry2: !Sub 'PN_ACTIONMANAGER_FUTUREACTIONDAO_TABLENAME=${FutureActionDynamoTableName}'
+        ContainerEnvEntry3: !Sub 'PN_ACTIONMANAGER_ACTIONDAO_TABLENAME=${ActionDynamoTableName}'
         MappedPaths: '/action-manager-private/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref SubnetsIds ]
@@ -573,5 +579,17 @@ Resources:
             Resource:
               - !Ref FutureActionDynamoTableArn
 
-
-
+  ActionManagerPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-ActionManagerPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "dynamodb:PutItem"
+              - "dynamodb:UpdateItem"
+            Resource:
+              - !Ref ActionDynamoTableArn
+              - !Ref FutureActionDynamoTableArn
