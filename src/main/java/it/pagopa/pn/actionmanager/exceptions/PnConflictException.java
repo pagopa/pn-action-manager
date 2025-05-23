@@ -5,8 +5,8 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public class PnBadRequestException extends PnRuntimeException {
-    public PnBadRequestException(String message, String description, String errorcode) {
+public class PnConflictException extends PnRuntimeException {
+    public PnConflictException(String message, String description, String errorcode) {
         super(message, description, HttpStatus.CONFLICT.value(), errorcode, null, description);
     }
 }

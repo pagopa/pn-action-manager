@@ -26,6 +26,7 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public Mono<Void> addOnlyActionIfAbsent(Action action) {
+        log.info("addOnlyActionIfAbsent actionId={} action={}", action.getActionId(), action);
         final String timeSlot = computeTimeSlot( action.getNotBefore() );
         action = action.toBuilder()
                 .timeslot( timeSlot)

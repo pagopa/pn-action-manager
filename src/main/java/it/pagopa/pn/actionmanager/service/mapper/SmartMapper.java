@@ -3,6 +3,7 @@ package it.pagopa.pn.actionmanager.service.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +15,10 @@ import java.util.Map;
 @Slf4j
 @Component
 @Data
-@NoArgsConstructor
+@AllArgsConstructor
 public class SmartMapper {
-    private static ObjectMapper objectMapper = new ObjectMapper();
-
-    public static Map<String, Object> mapFromStringToMap(String source) {
+    private final ObjectMapper objectMapper;
+    public Map<String, Object> mapFromStringToMap(String source) {
         try {
             return objectMapper.readValue(source, new TypeReference<>() {});
         } catch (JsonProcessingException e) {

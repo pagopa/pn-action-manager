@@ -26,7 +26,7 @@ class ActionServiceImplTest {
     private FutureActionDao futureActionDao;
 
     private ActionServiceImpl actionService;
-    @Mock
+
     private PnActionManagerConfigs pnActionManagerConfigs;
 
     @Mock
@@ -35,6 +35,9 @@ class ActionServiceImplTest {
     @BeforeEach
     public void setup() {
         actionDao = Mockito.mock(ActionDao.class);
+        pnActionManagerConfigs = new PnActionManagerConfigs();
+        pnActionManagerConfigs.setMaxSizeBytes(1024);
+        pnActionManagerConfigs.setMaxDepth(10);
         actionService = new ActionServiceImpl(actionDao, futureActionDao, pnActionManagerConfigs);
     }
 
@@ -51,11 +54,17 @@ class ActionServiceImplTest {
     @Test
     void addOnlyActionIfAbsent() {
         Action action = buildAction();
-
+        Instant instant = Instant.parse("2021-09-16T15:24:00.00Z");
         // Calcola il valore atteso di timeslot
         String expectedTimeSlot = "2021-09-16T15:24";
         Action expectedAction = action.toBuilder()
                 .timeslot(expectedTimeSlot)
+                .recipientIndex(0)
+                .type(ActionType.ANALOG_WORKFLOW)
+                .actionId("002")
+                .iun("001")
+                .notBefore(instant)
+                .details("{\"key\":\"TEST_KEY\",\"documentCreationType\":\"AAR\",\"timelineId\":\"TEST_TIMELINE_ID\"}")
                 .build();
         actionService.addOnlyActionIfAbsent(action);
 
@@ -65,12 +74,12 @@ class ActionServiceImplTest {
 
     private Action buildAction() {
         Instant instant = Instant.parse("2021-09-16T15:24:00.00Z");
-
         return Action.builder()
                 .recipientIndex(0)
                 .iun("001")
                 .type(ActionType.ANALOG_WORKFLOW)
                 .actionId("002")
+                .details("{\"key\":\"TEST_KEY\",\"documentCreationType\":\"AAR\",\"timelineId\":\"TEST_TIMELINE_ID\"}")
                 .notBefore(instant)
                 .build();
     }

@@ -2,6 +2,7 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.Action;
+import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.DtoToEntityActionMapper;
@@ -20,6 +21,7 @@ import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedExce
 
 import java.time.Duration;
 
+import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCodes.ERROR_CODE_ACTION_CONFLICT;
 import static it.pagopa.pn.commons.abstractions.impl.AbstractDynamoKeyValueStore.ATTRIBUTE_NOT_EXISTS;
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
 
@@ -29,9 +31,11 @@ import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GE
 public class ActionDaoDynamo implements ActionDao {
     private final DynamoDbAsyncTable<ActionEntity> table;
     private final Duration actionTtl;
+    private final DtoToEntityActionMapper dtoToEntityActionMapper;
 
     public ActionDaoDynamo(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
-                           PnActionManagerConfigs pnActionManagerConfigs) {
+                           PnActionManagerConfigs pnActionManagerConfigs, DtoToEntityActionMapper dtoToEntityActionMapper) {
+        this.dtoToEntityActionMapper = dtoToEntityActionMapper;
         this.table = dynamoDbEnhancedAsyncClient.table(pnActionManagerConfigs.getActionDao().getTableName(), TableSchema.fromClass(ActionEntity.class));
         this.actionTtl = fromStringDaysToDuration(pnActionManagerConfigs.getActionTtlDays());
     }
@@ -58,14 +62,14 @@ public class ActionDaoDynamo implements ActionDao {
                 .build();
 
         PutItemEnhancedRequest<ActionEntity> request = PutItemEnhancedRequest.builder(ActionEntity.class)
-                .item(DtoToEntityActionMapper.dtoToEntity(action, actionTtl))
+                .item(dtoToEntityActionMapper.dtoToEntity(action, actionTtl))
                 .conditionExpression(conditionExpressionPut)
                 .build();
-
         return Mono.fromFuture(() -> table.putItem(request))
                 .onErrorResume(ConditionalCheckFailedException.class, ex -> {
-                    log.warn("Action already present in the table, actionId={} ", action.getActionId(), ex);
-                    return Mono.empty();
-                });
+                    String message = String.format("Action already present in the table, actionId=%s ", action.getActionId());
+                    log.error(message, ex);
+                    return Mono.error(new PnConflictException("Conflict", message, ERROR_CODE_ACTION_CONFLICT));
+                }).then();
     }
 }

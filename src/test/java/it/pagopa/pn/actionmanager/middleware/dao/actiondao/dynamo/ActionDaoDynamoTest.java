@@ -3,8 +3,10 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.Action;
 import it.pagopa.pn.actionmanager.dto.ActionType;
+import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.DtoToEntityActionMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +46,9 @@ class ActionDaoDynamoTest {
     @Mock
     private ActionDao actionDao;
 
+    @Mock
+    private DtoToEntityActionMapper dtoToEntityActionMapper;
+
 
     @BeforeEach
     void setup() {
@@ -59,7 +66,7 @@ class ActionDaoDynamoTest {
         when(pnActionManagerConfigs.getActionDao()).thenReturn(actionDao);
         when(pnActionManagerConfigs.getActionTtlDays()).thenReturn("1095");
 
-        dynamo = new ActionDaoDynamo(dynamoDbEnhancedClient, pnActionManagerConfigs);
+        dynamo = new ActionDaoDynamo(dynamoDbEnhancedClient, pnActionManagerConfigs,dtoToEntityActionMapper);
     }
 
     @Test
@@ -79,9 +86,13 @@ class ActionDaoDynamoTest {
         when(table.putItem(Mockito.any(PutItemEnhancedRequest.class)))
                 .thenReturn(CompletableFuture.failedFuture(exception));
 
-        // Act & Assert
         StepVerifier.create(dynamo.addOnlyActionIfAbsent(action))
-                .verifyComplete(); // Verifica che il Mono completi senza errori
+                .expectErrorSatisfies(throwable -> {
+                    assertTrue(throwable instanceof PnConflictException);
+                    PnConflictException ex = (PnConflictException) throwable;
+                    assertEquals("Conflict", ex.getMessage());
+                })
+                .verify();
     }
 
     private Action buildAction() {
