@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.time.Instant;
 
@@ -20,7 +22,6 @@ class ActionServiceImplTest {
     @Mock
     private ActionDao actionDao;
 
-    @Mock
     private FutureActionDao futureActionDao;
 
     private ActionServiceImpl actionService;
@@ -28,6 +29,7 @@ class ActionServiceImplTest {
     @BeforeEach
     public void setup() {
         actionDao = Mockito.mock(ActionDao.class);
+        futureActionDao = Mockito.mock(FutureActionDao.class);
         actionService = new ActionServiceImpl(actionDao, futureActionDao);
     }
 
@@ -35,10 +37,14 @@ class ActionServiceImplTest {
     void unscheduleAction(){
         String timeSlot = "2021-09-16T15:24";
         String actionId = "001";
-        actionService.unscheduleAction(actionId, timeSlot);
+
+        Mockito.when(futureActionDao.unscheduleAction(timeSlot, actionId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(actionService.unscheduleAction(timeSlot, actionId))
+                .verifyComplete();
 
         // Verifica che il DAO sia stato chiamato con l'oggetto corretto
-        Mockito.verify(futureActionDao, Mockito.times(1)).unscheduleAction(Mockito.any(), Mockito.eq(timeSlot));
+        Mockito.verify(futureActionDao, Mockito.times(1)).unscheduleAction(Mockito.eq(timeSlot), Mockito.eq(actionId));
     }
 
     @Test
@@ -51,7 +57,10 @@ class ActionServiceImplTest {
                 .timeslot(expectedTimeSlot)
                 .build();
 
-        actionService.addOnlyActionIfAbsent(action);
+        Mockito.when(actionDao.addOnlyActionIfAbsent(expectedAction)).thenReturn(Mono.empty());
+
+        StepVerifier.create(actionService.addOnlyActionIfAbsent(action))
+                .verifyComplete();
 
         // Verifica che il DAO sia stato chiamato con l'oggetto corretto
         Mockito.verify(actionDao, Mockito.times(1)).addOnlyActionIfAbsent(expectedAction);

@@ -8,8 +8,9 @@ import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import reactor.core.publisher.Mono;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -21,14 +22,14 @@ import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCode
 @Slf4j
 @ConditionalOnProperty(name = FutureActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME, havingValue = MiddlewareTypes.DYNAMO)
 public class FutureActionDaoDynamo  implements FutureActionDao {
-    private final DynamoDbTable<FutureActionEntity> dynamoDbTableFutureAction;
+    private final DynamoDbAsyncTable<FutureActionEntity> table;
 
-    protected FutureActionDaoDynamo(DynamoDbEnhancedClient dynamoDbEnhancedClient, PnActionManagerConfigs cfg) {
-        this.dynamoDbTableFutureAction = dynamoDbEnhancedClient.table(cfg.getFutureActionDao().getTableName(), TableSchema.fromClass(FutureActionEntity.class));
+    protected FutureActionDaoDynamo(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient, PnActionManagerConfigs cfg) {
+        this.table = dynamoDbEnhancedAsyncClient.table(cfg.getFutureActionDao().getTableName(), TableSchema.fromClass(FutureActionEntity.class));
     }
 
     @Override
-    public void unscheduleAction(String timeSlot, String actionId) {
+    public Mono<Void> unscheduleAction(String timeSlot, String actionId) {
         String keyConditionExpression = String.format("%s = :timeSlot AND %s = :actionId",
                 FutureActionEntity.FIELD_TIME_SLOT, FutureActionEntity.FIELD_ACTION_ID);
 
@@ -38,17 +39,21 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
                 .putExpressionValue(":actionId", AttributeValue.builder().s(actionId).build())
                 .build();
 
+        FutureActionEntity updateEntity = getFutureActionEntity(timeSlot, actionId);
+        return Mono.fromFuture(() -> table.updateItem(r -> r.item(updateEntity).conditionExpression(conditionExpressionUpdate).ignoreNulls(true)))
+                .onErrorResume(ConditionalCheckFailedException.class, ex -> {
+                    String message = String.format("Future action with actionId=%s and timeSlot=%s not found", actionId, timeSlot);
+                    log.info(message, ex);
+                    return Mono.error(new PnNotFoundException("Not found", message, ERROR_CODE_FUTURE_ACTION_NOTFOUND));
+                }).then();
+    }
+
+    private FutureActionEntity getFutureActionEntity(String timeSlot, String actionId) {
         FutureActionEntity updateEntity = new FutureActionEntity();
         updateEntity.setTimeSlot(timeSlot);
         updateEntity.setLogicalDeleted(true);
-        updateEntity.setActionId(actionId);
 
-        try {
-            dynamoDbTableFutureAction.updateItem(r -> r.item(updateEntity).conditionExpression(conditionExpressionUpdate));
-        } catch (ConditionalCheckFailedException ex) {
-            String message = String.format("Action not found for timeSlot=%s and actionId=%s", timeSlot, actionId);
-            log.error(message, ex);
-            throw new PnNotFoundException("Not found", message, ERROR_CODE_FUTURE_ACTION_NOTFOUND);
-        }
+        updateEntity.setActionId(actionId);
+        return updateEntity;
     }
 }

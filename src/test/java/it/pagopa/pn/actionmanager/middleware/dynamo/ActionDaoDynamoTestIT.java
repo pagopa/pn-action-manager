@@ -1,37 +1,34 @@
 package it.pagopa.pn.actionmanager.middleware.dynamo;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import it.pagopa.pn.actionmanager.LocalStackTestConfig;
 import it.pagopa.pn.actionmanager.config.BaseTest;
 import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.ActionDaoDynamo;
 import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 
 @TestPropertySource(properties = {
         ActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
 })
-class ActionDaoDynamoTestIT extends BaseTest.WithLocalStack{
+class ActionDaoDynamoTestIT extends BaseTest.WithLocalStack {
     @Autowired
     private ActionDao actionDao;
 
     @Test
-    void addOnlyActionIfAbsentFailSilent() {
+    void addOnlyActionIfAbsentFail() {
         Action.ActionBuilder actionBuilder = Action.builder()
                 .iun("Test_addIfAbsentFailSilent_iun01")
                 .recipientIndex(1)
@@ -40,34 +37,28 @@ class ActionDaoDynamoTestIT extends BaseTest.WithLocalStack{
 
         Action action = actionBuilder.actionId(actionId).build();
 
-
-        // get Logback Logger
-        Logger fooLogger = LoggerFactory.getLogger(ActionDaoDynamo.class);
-
-        // create and start a ListAppender
+        Logger fooLogger = (Logger) LoggerFactory.getLogger(ActionDaoDynamo.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
+        fooLogger.addAppender(listAppender);
 
-        // add the appender to the logger
-        // addAppender is outdated now
-        ((ch.qos.logback.classic.Logger)fooLogger).addAppender(listAppender);
+        // Prima chiamata: inserisce l'azione
+        StepVerifier.create(actionDao.addOnlyActionIfAbsent(action))
+                .verifyComplete();
 
+        // Seconda chiamata: duplicato, deve loggare warn e non lanciare errori
+        StepVerifier.create(actionDao.addOnlyActionIfAbsent(action))
+                .verifyError(PnConflictException.class);
 
-        // non si riesce a mockare TransactWriteItemsEnhancedRequest
-        Assertions.assertDoesNotThrow(() ->
-                actionDao.addOnlyActionIfAbsent(action)
-        );
-
-        Assertions.assertDoesNotThrow(() ->
-                actionDao.addOnlyActionIfAbsent(action)
-        );
-
-        // JUnit assertions
+        // Verifica log
         List<ILoggingEvent> logsList = listAppender.list;
-        Assertions.assertEquals("Exception code ConditionalCheckFailed is expected for retry, letting flow continue actionId=Test_addIfAbsentFailSilent_iun01_digital_workflow_e_1_timelineid_ ", logsList.get(0)
-                .getFormattedMessage());
-        Assertions.assertEquals(Level.WARN, logsList.get(0)
-                .getLevel());
+        Assertions.assertFalse(logsList.isEmpty());
+        Assertions.assertTrue(
+                logsList.stream().anyMatch(
+                        log -> log.getLevel() == Level.INFO &&
+                                log.getFormattedMessage().contains("Action already present in the table, actionId=" + actionId)
+                )
+        );
     }
 
 }
