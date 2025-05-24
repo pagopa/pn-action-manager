@@ -5,6 +5,7 @@ import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionE
 import it.pagopa.pn.actionmanager.service.mapper.SmartMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -23,8 +24,10 @@ public class DtoToEntityActionMapper {
                 .type(dto.getType())
                 .timeslot(dto.getTimeslot())
                 .timelineId(dto.getTimelineId())
-                .iun(dto.getIun())
-                .details(dtoToDetailsEntity(dto.getDetails()));
+                .iun(dto.getIun());
+
+        if(StringUtils.hasText(dto.getDetails()))
+            builder.details(dtoToDetailsEntity(dto.getDetails()));
 
         if (!actionTtl.isZero())
             builder.ttl(LocalDateTime.now().plus(actionTtl).atZone(ZoneId.systemDefault()).toEpochSecond());
