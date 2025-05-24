@@ -5,6 +5,8 @@ import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.DtoToEntityActionMapper;
+import it.pagopa.pn.actionmanager.service.mapper.SmartMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,7 +55,13 @@ class ActionDaoDynamoTest {
 
         when(pnActionManagerConfigs.getActionDao()).thenReturn(actionDao);
         when(pnActionManagerConfigs.getActionTtlDays()).thenReturn("1095");
-        actionDaoDynamo = new ActionDaoDynamo(dynamoDbEnhancedClient, pnActionManagerConfigs);
+
+        SmartMapper smartMapper = Mockito.mock(SmartMapper.class);
+        when(smartMapper.mapFromJsonStringToMap(Mockito.anyString()))
+                .thenReturn(new HashMap<>());
+        DtoToEntityActionMapper dtoToEntityActionMapper = new DtoToEntityActionMapper(smartMapper);
+
+        actionDaoDynamo = new ActionDaoDynamo(dynamoDbEnhancedClient, pnActionManagerConfigs, dtoToEntityActionMapper);
     }
 
     @Test

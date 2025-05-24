@@ -4,9 +4,7 @@ import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
-import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
@@ -20,7 +18,6 @@ import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCode
 
 @Component
 @Slf4j
-@ConditionalOnProperty(name = FutureActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME, havingValue = MiddlewareTypes.DYNAMO)
 public class FutureActionDaoDynamo  implements FutureActionDao {
     private final DynamoDbAsyncTable<FutureActionEntity> table;
 

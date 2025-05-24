@@ -193,6 +193,11 @@ Parameters:
     Type: String
     Description: 'Enable action lambdas end'
 
+  ApplicativeEnvFileChecksum:
+    Type: String
+    Default: ''
+    Description: 'Applicative environment variable file checksum'
+
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -209,6 +214,7 @@ Resources:
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'PN_ACTIONMANAGER_FUTUREACTIONDAO_TABLENAME=${FutureActionDynamoTableName}'
         ContainerEnvEntry3: !Sub 'PN_ACTIONMANAGER_ACTIONDAO_TABLENAME=${ActionDynamoTableName}'
+        ApplicativeEnvFileChecksum: !Ref ApplicativeEnvFileChecksum
         MappedPaths: '/action-manager-private/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref SubnetsIds ]

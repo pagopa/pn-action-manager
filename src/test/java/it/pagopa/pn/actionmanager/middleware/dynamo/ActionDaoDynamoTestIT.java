@@ -10,19 +10,14 @@ import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.ActionDaoDynamo;
-import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
 
 import java.util.List;
 
-@TestPropertySource(properties = {
-        ActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
-})
 class ActionDaoDynamoTestIT extends BaseTest.WithLocalStack {
     @Autowired
     private ActionDao actionDao;

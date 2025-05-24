@@ -1,51 +1,44 @@
 package it.pagopa.pn.actionmanager.dto.action;
 
-import it.pagopa.pn.actionmanager.dto.action.details.*;
 import lombok.Getter;
 
 @Getter
 public enum ActionType {
 
-    NOTIFICATION_VALIDATION(NotificationValidationActionDetails.class),
+    NOTIFICATION_VALIDATION,
 
-    NOTIFICATION_REFUSED(NotificationRefusedActionDetails.class),
+    NOTIFICATION_REFUSED,
 
-    NOTIFICATION_CANCELLATION(NotHandledDetails.class),
+    NOTIFICATION_CANCELLATION,
 
-    SCHEDULE_RECEIVED_LEGALFACT_GENERATION(NotHandledDetails.class),
+    SCHEDULE_RECEIVED_LEGALFACT_GENERATION,
 
-    CHECK_ATTACHMENT_RETENTION(NotHandledDetails.class),
+    CHECK_ATTACHMENT_RETENTION,
 
-    START_RECIPIENT_WORKFLOW(RecipientsWorkflowDetails.class),
+    START_RECIPIENT_WORKFLOW,
 
-    CHOOSE_DELIVERY_MODE(NotHandledDetails.class),
+    CHOOSE_DELIVERY_MODE,
 
-    ANALOG_WORKFLOW(NotHandledDetails.class),
+    ANALOG_WORKFLOW,
 
-    DIGITAL_WORKFLOW_NEXT_ACTION(NotHandledDetails.class),
+    DIGITAL_WORKFLOW_NEXT_ACTION,
 
-    DIGITAL_WORKFLOW_NEXT_EXECUTE_ACTION(NotHandledDetails.class),
+    DIGITAL_WORKFLOW_NEXT_EXECUTE_ACTION,
 
-    DIGITAL_WORKFLOW_NO_RESPONSE_TIMEOUT_ACTION(NotHandledDetails.class),
+    DIGITAL_WORKFLOW_NO_RESPONSE_TIMEOUT_ACTION,
 
-    DIGITAL_WORKFLOW_RETRY_ACTION(NotHandledDetails.class),
+    DIGITAL_WORKFLOW_RETRY_ACTION,
 
-    SEND_DIGITAL_FINAL_STATUS_RESPONSE(SendDigitalFinalStatusResponseDetails.class),
+    SEND_DIGITAL_FINAL_STATUS_RESPONSE,
 
-    REFINEMENT_NOTIFICATION(NotHandledDetails.class),
+    REFINEMENT_NOTIFICATION,
 
-    SENDER_ACK(NotHandledDetails.class),
+    SENDER_ACK,
 
-    DOCUMENT_CREATION_RESPONSE(DocumentCreationResponseActionDetails.class),
+    DOCUMENT_CREATION_RESPONSE,
 
-    POST_ACCEPTED_PROCESSING_COMPLETED(NotHandledDetails.class),
+    POST_ACCEPTED_PROCESSING_COMPLETED,
 
-    SEND_ANALOG_FINAL_STATUS_RESPONSE(NotHandledDetails.class);
-
-    private final Class<? extends ActionDetails> detailsJavaClass;
-
-    ActionType(Class<? extends ActionDetails> detailsJavaClass) {
-        this.detailsJavaClass = detailsJavaClass;
-    }
+    SEND_ANALOG_FINAL_STATUS_RESPONSE
 
 }
