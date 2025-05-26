@@ -16,8 +16,12 @@ public class SmartMapper {
 
     private static ModelMapper modelMapper;
 
-    static{
+    static {
         modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STANDARD)
+                .setFieldMatchingEnabled(true)
+                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
     }
 
@@ -25,10 +29,10 @@ public class SmartMapper {
         Mapping effettuato per la modifica dei timestamp per gli
         elementi di timeline che implementano l'interfaccia ElementTimestampTimelineElementDetails
      */
-    public static  <S,T> T mapToClass(S source, Class<T> destinationClass ){
+    public static <S, T> T mapToClass(S source, Class<T> destinationClass) {
         T result;
-        if( source != null) {
-            result = modelMapper.map(source, destinationClass );
+        if (source != null) {
+            result = modelMapper.map(source, destinationClass);
         } else {
             result = null;
         }
