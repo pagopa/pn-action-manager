@@ -8,6 +8,7 @@ import it.pagopa.pn.actionmanager.service.ActionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -21,17 +22,17 @@ public class ActionServiceImpl implements ActionService {
     private final FutureActionDao futureActionDao;
 
     @Override
-    public void addOnlyActionIfAbsent(Action action) {
+    public Mono<Void> addOnlyActionIfAbsent(Action action) {
         final String timeSlot = computeTimeSlot( action.getNotBefore() );
         action = action.toBuilder()
                 .timeslot( timeSlot)
                 .build();
-        actionDao.addOnlyActionIfAbsent(action);
+        return actionDao.addOnlyActionIfAbsent(action);
     }
 
     @Override
-    public void unscheduleAction(String timeSlot, String actionId){
-        futureActionDao.unscheduleAction(timeSlot, actionId);
+    public Mono<Void> unscheduleAction(String timeSlot, String actionId){
+        return futureActionDao.unscheduleAction(timeSlot, actionId);
     }
 
     private String computeTimeSlot(Instant instant) {
