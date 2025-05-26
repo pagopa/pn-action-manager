@@ -34,11 +34,6 @@ class ActionManagerControllerTest {
     @Test
     void testInsertAction() {
 
-        Action mappedAction = Action.builder()
-                .iun("testIun")
-                .actionId("testActionId")
-                .build();
-
         it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.Action inputAction =
                 new it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.Action();
 
