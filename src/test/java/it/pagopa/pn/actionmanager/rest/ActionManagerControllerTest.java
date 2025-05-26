@@ -1,7 +1,5 @@
 package it.pagopa.pn.actionmanager.rest;
 
-
-import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.service.ActionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
