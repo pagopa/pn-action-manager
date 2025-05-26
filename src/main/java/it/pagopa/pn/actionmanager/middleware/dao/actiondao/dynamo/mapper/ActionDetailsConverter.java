@@ -20,7 +20,7 @@ public class ActionDetailsConverter implements AttributeConverter<Map<String, Ob
 
     @Override
     public Map<String, Object> transformTo(AttributeValue attributeValue) {
-        return null;
+        return new HashMap<>();
     }
 
     @Override

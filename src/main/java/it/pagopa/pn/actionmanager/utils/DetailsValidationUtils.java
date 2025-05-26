@@ -16,6 +16,7 @@ import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCode
 @Slf4j
 @Component
 public class DetailsValidationUtils {
+    private DetailsValidationUtils() { }
 
     /**
      * Validates a JSON string by checking its size and depth.

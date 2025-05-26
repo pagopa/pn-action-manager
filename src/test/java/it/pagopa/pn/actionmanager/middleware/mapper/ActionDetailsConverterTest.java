@@ -64,7 +64,9 @@ class ActionDetailsConverterTest {
     @Test
     void testTransformToReturnsNull() {
         AttributeValue dummy = AttributeValue.builder().s("test").build();
-        assertNull(converter.transformTo(dummy));
+        Map<String, Object> result = converter.transformTo(dummy);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
