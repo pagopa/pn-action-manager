@@ -99,7 +99,37 @@
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -107,17 +137,41 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build-image</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+  				<version>0.10.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-					<excludes>
-						<exclude>**/generated/**</exclude>
-						<exclude>**it/pagopa/pn/action-manager/rest/v1/**</exclude>
-					</excludes>
+					<mainClass>it.pagopa.pn.actionmanager.ActionManagerApplication</mainClass>
+					<buildArgs>
+						<buildArg>--trace-class-initialization=ch.qos.logback.core.util.StatusPrinter,org.slf4j.helpers.Reporter,ch.qos.logback.core.util.Loader,org.slf4j.LoggerFactory,ch.qos.logback.classic.Level,org.apache.commons.logging.LogFactory,ch.qos.logback.classic.Logger,ch.qos.logback.core.util.StatusPrinter2,ch.qos.logback.core.status.StatusBase,ch.qos.logback.core.status.InfoStatus,org.apache.commons.logging.LogFactoryService</buildArg>
+					</buildArgs>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>native</id>
+			<properties>
+				<spring-boot.build-image.imageName>pn-action-manager:native</spring-boot.build-image.imageName>
+			</properties>
+		</profile>
+	</profiles>
 </project>
