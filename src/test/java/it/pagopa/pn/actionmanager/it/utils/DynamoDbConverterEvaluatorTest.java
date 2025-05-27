@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DynamoDbConverterEvaluatorTest {
 
-    private final static Map<String, AttributeValue> ITEM_MAP = Map.of(
+    private static final Map<String, AttributeValue> ITEM_MAP = Map.of(
             "id", AttributeValue.builder().s("123").build(),
             "count", AttributeValue.builder().n("42").build(),
             "active", AttributeValue.builder().bool(true).build(),
@@ -24,22 +24,22 @@ class DynamoDbConverterEvaluatorTest {
     );
 
     @Test
-    public void testVerifyConversion_S_OK() {
+    void testVerifyConversion_S_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "id", Type.S, "123");
     }
 
     @Test
-    public void testVerifyConversion_N_OK() {
+    void testVerifyConversion_N_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "count", Type.N, "42");
     }
 
     @Test
-    public void testVerifyConversion_BOOL_OK() {
+    void testVerifyConversion_BOOL_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "active", Type.BOOL, true);
     }
 
     @Test
-    public void testVerifyConversion_BOOL_KO_TYPE() {
+    void testVerifyConversion_BOOL_KO_TYPE() {
         AssertionError error = assertThrows(AssertionError.class, () ->
                 DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "id", Type.BOOL)
         );
@@ -47,7 +47,7 @@ class DynamoDbConverterEvaluatorTest {
     }
 
     @Test
-    public void testVerifyConversion_BOOL_KO_VALUE() {
+    void testVerifyConversion_BOOL_KO_VALUE() {
         AssertionError error = assertThrows(AssertionError.class, () ->
             DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "active", Type.BOOL, false)
         );
@@ -55,27 +55,27 @@ class DynamoDbConverterEvaluatorTest {
     }
 
     @Test
-    public void testVerifyConversion_SS_WHOLE_MATCH_OK() {
+    void testVerifyConversion_SS_WHOLE_MATCH_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "tags", Type.SS, List.of("tag1", "tag2", "tag3"));
     }
 
     @Test
-    public void testVerifyConversion_SS_CONTAINS_OK() {
+    void testVerifyConversion_SS_CONTAINS_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "tags", Type.SS, "tag1");
     }
 
     @Test
-    public void testVerifyConversion_SS_PARTIAL_MATCH_OK() {
+    void testVerifyConversion_SS_PARTIAL_MATCH_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "tags", Type.SS, List.of("tag1", "tag2"));
     }
 
     @Test
-    public void testVerifyConversion_NULL_OK() {
+    void testVerifyConversion_NULL_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "nullValue", Type.NUL);
     }
 
     @Test
-    public void testVerifyConversion_NULL_KO() {
+    void testVerifyConversion_NULL_KO() {
         AssertionError error = assertThrows(AssertionError.class, () ->
             DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "id", Type.NUL)
         );
@@ -83,12 +83,12 @@ class DynamoDbConverterEvaluatorTest {
     }
 
     @Test
-    public void testVerifyConversion_L_OK() {
+    void testVerifyConversion_L_OK() {
         DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "emptyList", Type.L, List.of());
     }
 
     @Test
-    public void testVerifyConversion_L_KO() {
+    void testVerifyConversion_L_KO() {
         AssertionError error = assertThrows(AssertionError.class, () ->
             DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "active", Type.L, List.of())
         );

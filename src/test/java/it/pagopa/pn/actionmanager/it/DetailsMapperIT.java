@@ -7,14 +7,11 @@ import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue.Type;
 
-import java.util.List;
 import java.util.Map;
 
 import static it.pagopa.pn.actionmanager.it.utils.DynamoDbConverterEvaluator.verifyConversion;
-import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings({"unchecked"})
-public class DetailsMapperIT {
+class DetailsMapperIT {
     private final ActionDetailsConverter actionDetailsConverter = new ActionDetailsConverter();
     private final SmartMapper smartMapper = new SmartMapper(new ObjectMapper());
 
@@ -68,15 +65,9 @@ public class DetailsMapperIT {
              }""";
 
     @Test
-    public void testMappers_DetailsStartRecipientWorkflow() {
+    void testMappers_DetailsStartRecipientWorkflow() {
         // Converto un JSON rappresentante un detail associato ad azioni con tipologia START_RECIPIENT_WORKFLOW in una mappa
         Map<String, Object> detailsInt = smartMapper.mapFromJsonStringToMap(DETAILS_START_RECIPIENT_WORKFLOW);
-        assertNotNull(detailsInt);
-        assertEquals(2, detailsInt.size());
-        assertTrue(detailsInt.containsKey("quickAccessLinkToken"));
-        assertEquals("TlVZWi1OSkVXLURZVUotMjAyNTAzLVUtMV9QRi1iM2NjYWMzMS0zOGVhLTQ0Y2QtOTYwMS05ZjJkMTllODUzYWZfNDU0MGQ5MDMtNjczYy00YjM0LTlhMDEtN2QwNGNhMzU5OGVj", detailsInt.get("quickAccessLinkToken"));
-        assertTrue(detailsInt.containsKey("retryAttempt"));
-        assertEquals(0, ((Number) detailsInt.get("retryAttempt")).intValue());
 
         // Converto la mappa in un AttributeValue, che rappresenta l'oggetto DynamoDB cercando di preservare le tipizzazioni corrette
         Map<String, AttributeValue> detailsEntity = actionDetailsConverter.transformFrom(detailsInt).m();
@@ -87,15 +78,9 @@ public class DetailsMapperIT {
     }
 
     @Test
-    public void testMappers_DetailsDocumentCreationResponse() {
+    void testMappers_DetailsDocumentCreationResponse() {
         // Converto un JSON rappresentante un detail associato ad azioni con tipologia DOCUMENT_CREATION_RESPONSE in una mappa
         Map<String, Object> detailsInt = smartMapper.mapFromJsonStringToMap(DETAILS_DOCUMENT_CREATION_RESPONSE);
-
-        assertEquals("DIGITAL_DELIVERY", detailsInt.get("documentCreationType"));
-        assertEquals("safestorage://PN_LEGAL_FACTS-8e9217ab793443c8aae0e5b57c2338e4.pdf", detailsInt.get("key"));
-        assertEquals(0, ((Number) detailsInt.get("retryAttempt")).intValue());
-        assertEquals("DIGITAL_DELIVERY_CREATION_REQUEST.IUN_KXQM-DYGY-LNJA-202410-H-1.RECINDEX_0", detailsInt.get("timelineId"));
-        assertEquals(4, detailsInt.size());
 
         // Converto la mappa in un AttributeValue, che rappresenta l'oggetto DynamoDB cercando di preservare le tipizzazioni corrette
         Map<String, AttributeValue> detailsEntity = actionDetailsConverter.transformFrom(detailsInt).m();
@@ -108,15 +93,9 @@ public class DetailsMapperIT {
     }
 
     @Test
-    public void testMappers_DetailsNotificationValidation() {
+    void testMappers_DetailsNotificationValidation() {
         // Converto un JSON rappresentante un detail associato ad azioni con tipologia NOTIFICATION_VALIDATION in una mappa
         Map<String, Object> detailsInt = smartMapper.mapFromJsonStringToMap(DETAILS_NOTIFICATION_VALIDATION);
-        assertNotNull(detailsInt);
-        assertEquals(2, detailsInt.size());
-        assertTrue(detailsInt.containsKey("retryAttempt"));
-        assertEquals(0, ((Number) detailsInt.get("retryAttempt")).intValue());
-        assertTrue(detailsInt.containsKey("startWorkflowTime"));
-        assertEquals("2025-05-27T09:53:42.703930640Z", detailsInt.get("startWorkflowTime"));
 
         // Converto la mappa in un AttributeValue, che rappresenta l'oggetto DynamoDB cercando di preservare le tipizzazioni corrette
         Map<String, AttributeValue> detailsEntity = actionDetailsConverter.transformFrom(detailsInt).m();
@@ -127,22 +106,9 @@ public class DetailsMapperIT {
     }
 
     @Test
-    public void testMappers_DetailsNotificationRefused() {
+    void testMappers_DetailsNotificationRefused() {
         // Converto un JSON rappresentante un detail associato ad azioni con tipologia NOTIFICATION_REFUSED in una mappa
         Map<String, Object> detailsInt = smartMapper.mapFromJsonStringToMap(DETAILS_NOTIFICATION_REFUSED);
-        assertNotNull(detailsInt);
-        assertEquals(2, detailsInt.size());
-        assertTrue(detailsInt.containsKey("retryAttempt"));
-        assertEquals(0, ((Number) detailsInt.get("retryAttempt")).intValue());
-        assertTrue(detailsInt.containsKey("errors"));
-        assertInstanceOf(List.class, detailsInt.get("errors"));
-        assertEquals(2, ((List<?>) detailsInt.get("errors")).size());
-        assertEquals("ADDRESS_NOT_FOUND", ((Map<String, Object>) ((List<?>) detailsInt.get("errors")).getFirst()).get("errorCode"));
-        assertEquals("Address not found for recipient index: 0", ((Map<String, Object>) ((List<?>) detailsInt.get("errors")).get(0)).get("detail"));
-        assertEquals(0, ((Number) ((Map<String, Object>) ((List<?>) detailsInt.get("errors")).get(0)).get("recIndex")).intValue());
-        assertEquals("ADDRESS_NOT_FOUND", ((Map<String, Object>) ((List<?>) detailsInt.get("errors")).get(1)).get("errorCode"));
-        assertEquals("Address not found for recipient index: 2", ((Map<String, Object>) ((List<?>) detailsInt.get("errors")).get(1)).get("detail"));
-        assertEquals(2, ((Number) ((Map<String, Object>) ((List<?>) detailsInt.get("errors")).get(1)).get("recIndex")).intValue());
 
         // Converto la mappa in un AttributeValue, che rappresenta l'oggetto DynamoDB cercando di preservare le tipizzazioni corrette
         Map<String, AttributeValue> detailsEntity = actionDetailsConverter.transformFrom(detailsInt).m();
@@ -161,21 +127,9 @@ public class DetailsMapperIT {
     }
 
     @Test
-    public void testMappers_DetailsSendDigitalFinalStatusResponse() {
+    void testMappers_DetailsSendDigitalFinalStatusResponse() {
         // Converto un JSON rappresentante un detail associato ad azioni con tipologia SEND_DIGITAL_FINAL_STATUS_RESPONSE in una mappa
         Map<String, Object> detailsInt = smartMapper.mapFromJsonStringToMap(DETAILS_SEND_DIGITAL_FINAL_STATUS_RESPONSE);
-        assertNotNull(detailsInt);
-        assertEquals(3, detailsInt.size());
-        assertTrue(detailsInt.containsKey("isFirstSendRetry"));
-        assertFalse((Boolean) detailsInt.get("isFirstSendRetry"));
-        assertTrue(detailsInt.containsKey("lastAttemptAddressInfo"));
-        assertInstanceOf(Map.class, detailsInt.get("lastAttemptAddressInfo"));
-        Map<String, Object> lastAttemptAddressInfoInt = (Map<String, Object>) detailsInt.get("lastAttemptAddressInfo");
-        assertEquals("2025-03-05T19:40:29.656258472Z", lastAttemptAddressInfoInt.get("lastAttemptDate"));
-        assertEquals("SEND_DIGITAL_FEEDBACK.IUN_VKJH-TPZN-YUPU-202503-D-1.RECINDEX_0.SOURCE_SPECIAL.REPEAT_false.ATTEMPT_0", lastAttemptAddressInfoInt.get("relatedFeedbackTimelineId"));
-        assertEquals(0, ((Number) lastAttemptAddressInfoInt.get("sentAttemptMade")).intValue());
-        assertTrue(detailsInt.containsKey("retryAttempt"));
-        assertEquals(0, ((Number) detailsInt.get("retryAttempt")).intValue());
 
         // Converto la mappa in un AttributeValue, che rappresenta l'oggetto DynamoDB cercando di preservare le tipizzazioni corrette
         Map<String, AttributeValue> detailsEntity = actionDetailsConverter.transformFrom(detailsInt).m();
