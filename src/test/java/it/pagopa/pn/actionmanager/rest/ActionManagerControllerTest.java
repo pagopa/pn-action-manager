@@ -1,5 +1,6 @@
 package it.pagopa.pn.actionmanager.rest;
 
+import it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.NewAction;
 import it.pagopa.pn.actionmanager.service.ActionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,8 +33,7 @@ class ActionManagerControllerTest {
     @Test
     void testInsertAction() {
 
-        it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.NewAction inputAction =
-                new it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.NewAction();
+        NewAction inputAction = new NewAction();
 
         when(actionService.addOnlyActionIfAbsent(any())).thenReturn(Mono.empty());
 
