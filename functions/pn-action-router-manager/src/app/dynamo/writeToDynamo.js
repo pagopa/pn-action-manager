@@ -98,29 +98,11 @@ function getFutureAction(action){
     type: action.type,
     timelineId: action.timelineId,
     iun: action.iun,
-    details: getActionDetails(action.details),
+    details: action.details,
     ttl: ttl
   };
 
   return futureAction;
-}
-
-function getActionDetails(actionDetails) {
-    if (actionDetails) {
-        return {
-          quickAccessLinkToken: actionDetails.quickAccessLinkToken,
-          key: actionDetails.key,
-          documentCreationType: actionDetails.documentCreationType,
-          timelineId: actionDetails.timelineId,
-          retryAttempt: actionDetails.retryAttempt,
-          startWorkflowTime: actionDetails.startWorkflowTime,
-          errors: actionDetails.errors,
-          isFirstSendRetry: actionDetails.isFirstSendRetry,
-          alreadyPresentRelatedFeedbackTimelineId: actionDetails.alreadyPresentRelatedFeedbackTimelineId,
-          lastAttemptAddressInfo: actionDetails.lastAttemptAddressInfo,
-        };
-    }
-    return actionDetails;
 }
 
 module.exports = { writeMessagesToDynamo };
