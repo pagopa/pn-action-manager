@@ -22,12 +22,11 @@ public class Action {
 
     private Boolean logicalDeleted;
 
-    // Required and used for SEND_PEC and RECEIVE_PEC ActionType
     private Integer recipientIndex;
 
     private String timelineId;
 
     private String timeslot;
 
-    private ActionDetails details;
+    private String details;
 }

@@ -4,7 +4,5 @@ import it.pagopa.pn.actionmanager.dto.action.Action;
 import reactor.core.publisher.Mono;
 
 public interface ActionDao {
-    String IMPLEMENTATION_TYPE_PROPERTY_NAME = "pn.middleware.impl.action-dao";
-
     Mono<Void> addOnlyActionIfAbsent(Action action);
 }

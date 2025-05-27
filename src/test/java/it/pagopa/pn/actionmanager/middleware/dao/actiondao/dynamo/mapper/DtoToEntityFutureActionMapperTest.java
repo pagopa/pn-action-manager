@@ -44,6 +44,7 @@ class DtoToEntityFutureActionMapperTest {
                 .type(ActionType.ANALOG_WORKFLOW)
                 .timelineId("2021-09-16T15:24:00.00Z")
                 .timeSlot("2021-09-16T15:24:00.00Z")
+                .details(null)
                 .build();
     }
 }

@@ -1,10 +1,12 @@
 package it.pagopa.pn.actionmanager.service.impl;
 
 
+import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.service.ActionService;
+import it.pagopa.pn.actionmanager.utils.DetailsValidationUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,19 +22,17 @@ import java.time.ZoneOffset;
 public class ActionServiceImpl implements ActionService {
     private final ActionDao actionDao;
     private final FutureActionDao futureActionDao;
+    private final PnActionManagerConfigs pnActionManagerConfigs;
 
     @Override
     public Mono<Void> addOnlyActionIfAbsent(Action action) {
+        log.info("addOnlyActionIfAbsent actionId={} action={}", action.getActionId(), action);
         final String timeSlot = computeTimeSlot( action.getNotBefore() );
         action = action.toBuilder()
                 .timeslot( timeSlot)
                 .build();
+        DetailsValidationUtils.validateDetails(action.getDetails(), pnActionManagerConfigs.getDetailsMaxSizeBytes(), pnActionManagerConfigs.getDetailsMaxDepth());
         return actionDao.addOnlyActionIfAbsent(action);
-    }
-
-    @Override
-    public Mono<Void> unscheduleAction(String timeSlot, String actionId){
-        return futureActionDao.unscheduleAction(timeSlot, actionId);
     }
 
     private String computeTimeSlot(Instant instant) {
@@ -43,5 +43,11 @@ public class ActionServiceImpl implements ActionService {
                 nowUtc.getDayOfMonth(),
                 nowUtc.getHour(),
                 nowUtc.getMinute());
+    }
+
+    @Override
+    public Mono<Void> unscheduleAction(String timeSlot, String actionId){
+        log.info("unscheduleAction timeSlot={} actionId={}", timeSlot, actionId);
+        return futureActionDao.unscheduleAction(timeSlot, actionId);
     }
 }

@@ -6,13 +6,14 @@ import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.DtoToEntityActionMapper;
-import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
@@ -24,13 +25,14 @@ import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GE
 
 @Component
 @Slf4j
-@ConditionalOnProperty(name = ActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME, havingValue = MiddlewareTypes.DYNAMO)
 public class ActionDaoDynamo implements ActionDao {
     private final DynamoDbAsyncTable<ActionEntity> table;
     private final Duration actionTtl;
+    private final DtoToEntityActionMapper dtoToEntityActionMapper;
 
     public ActionDaoDynamo(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
-                           PnActionManagerConfigs pnActionManagerConfigs) {
+                           PnActionManagerConfigs pnActionManagerConfigs, DtoToEntityActionMapper dtoToEntityActionMapper) {
+        this.dtoToEntityActionMapper = dtoToEntityActionMapper;
         this.table = dynamoDbEnhancedAsyncClient.table(pnActionManagerConfigs.getActionDao().getTableName(), TableSchema.fromClass(ActionEntity.class));
         this.actionTtl = fromStringDaysToDuration(pnActionManagerConfigs.getActionTtlDays());
     }
@@ -57,7 +59,7 @@ public class ActionDaoDynamo implements ActionDao {
                 .build();
 
         PutItemEnhancedRequest<ActionEntity> request = PutItemEnhancedRequest.builder(ActionEntity.class)
-                .item(DtoToEntityActionMapper.dtoToEntity(action, actionTtl))
+                .item(dtoToEntityActionMapper.dtoToEntity(action, actionTtl))
                 .conditionExpression(conditionExpressionPut)
                 .build();
 
@@ -68,6 +70,4 @@ public class ActionDaoDynamo implements ActionDao {
                     return Mono.error(new PnConflictException("Conflict", message, ERROR_CODE_ACTION_CONFLICT));
                 }).then();
     }
-
-
 }
