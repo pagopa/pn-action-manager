@@ -1,7 +1,7 @@
 package it.pagopa.pn.actionmanager.rest;
 
 import it.pagopa.pn.actionmanager.generated.openapi.server.v1.api.ActionApi;
-import it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.Action;
+import it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.NewAction;
 import it.pagopa.pn.actionmanager.service.ActionService;
 import it.pagopa.pn.actionmanager.service.mapper.SmartMapper;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class ActionManagerController implements ActionApi {
     private final ActionService actionService;
 
     @Override
-    public Mono<ResponseEntity<Void>> insertAction(Mono<Action> action, final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Void>> insertAction(Mono<NewAction> action, final ServerWebExchange exchange) {
         return action.flatMap(a -> actionService.addOnlyActionIfAbsent(SmartMapper.mapToClass(a, it.pagopa.pn.actionmanager.dto.action.Action.class)))
                 .thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
     }

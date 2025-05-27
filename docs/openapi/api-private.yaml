@@ -28,7 +28,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Action"
+              $ref: "#/components/schemas/NewAction"
       responses:
         "201":
           description: Richiesta accettata, in corso di elaborazione
@@ -97,7 +97,7 @@ components:
 
   schemas:
 
-    Action:
+    NewAction:
       required:
         - actionId
         - iun

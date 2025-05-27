@@ -32,8 +32,8 @@ class ActionManagerControllerTest {
     @Test
     void testInsertAction() {
 
-        it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.Action inputAction =
-                new it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.Action();
+        it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.NewAction inputAction =
+                new it.pagopa.pn.actionmanager.generated.openapi.server.v1.dto.NewAction();
 
         when(actionService.addOnlyActionIfAbsent(any())).thenReturn(Mono.empty());
 
