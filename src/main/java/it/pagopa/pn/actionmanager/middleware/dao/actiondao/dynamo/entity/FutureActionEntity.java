@@ -3,10 +3,7 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.ActionDetailsConverter;
 import lombok.*;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnoreNulls;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.time.Instant;
 import java.util.Map;
@@ -31,6 +28,18 @@ public class FutureActionEntity {
     private Integer recipientIndex;
     private String timelineId;
     private Map<String,Object> details;
+
+    @DynamoDbPartitionKey
+    @DynamoDbAttribute(value = FIELD_TIME_SLOT )
+    public String getTimeSlot() {
+        return timeSlot;
+    }
+
+    @DynamoDbSortKey
+    @DynamoDbAttribute(value = FIELD_ACTION_ID )
+    public String getActionId() {
+        return actionId;
+    }
 
     @DynamoDbAttribute(value = "details")
     @DynamoDbConvertedBy(ActionDetailsConverter.class)
