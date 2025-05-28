@@ -31,6 +31,7 @@ class EntityToDtoFutureActionMapperTest {
                 .recipientIndex(1)
                 .type(ActionType.ANALOG_WORKFLOW)
                 .timelineId("2021-09-16T15:24:00.00Z")
+                .details("")
                 .build();
     }
 

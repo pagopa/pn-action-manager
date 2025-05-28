@@ -7,20 +7,15 @@ import it.pagopa.pn.actionmanager.config.BaseTest;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.FutureActionDaoDynamo;
-import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
 
 import java.util.List;
 
-@TestPropertySource(properties = {
-        FutureActionDao.IMPLEMENTATION_TYPE_PROPERTY_NAME + "=" + MiddlewareTypes.DYNAMO
-})
 class FutureActionDaoDynamoTestIT extends BaseTest.WithLocalStack {
     @Autowired
     private FutureActionDao futureActionDao;

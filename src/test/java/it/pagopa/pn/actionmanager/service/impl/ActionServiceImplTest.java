@@ -1,6 +1,7 @@
 package it.pagopa.pn.actionmanager.service.impl;
 
 
+import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
@@ -30,7 +31,10 @@ class ActionServiceImplTest {
     public void setup() {
         actionDao = Mockito.mock(ActionDao.class);
         futureActionDao = Mockito.mock(FutureActionDao.class);
-        actionService = new ActionServiceImpl(actionDao, futureActionDao);
+        PnActionManagerConfigs pnActionManagerConfigs = new PnActionManagerConfigs();
+        pnActionManagerConfigs.setDetailsMaxSizeBytes(10000);
+        pnActionManagerConfigs.setDetailsMaxDepth(5);
+        actionService = new ActionServiceImpl(actionDao, futureActionDao, pnActionManagerConfigs);
     }
 
     @Test
