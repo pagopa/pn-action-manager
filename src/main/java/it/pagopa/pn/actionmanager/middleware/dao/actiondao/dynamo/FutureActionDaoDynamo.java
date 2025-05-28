@@ -3,6 +3,8 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionDetailsEntity;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,10 +13,16 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
+import java.time.Instant;
+import java.util.Map;
+
 import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCodes.ERROR_CODE_FUTURE_ACTION_NOTFOUND;
+import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
+import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primarySortKey;
 
 @Component
 @Slf4j
@@ -22,7 +30,52 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
     private final DynamoDbAsyncTable<FutureActionEntity> table;
 
     protected FutureActionDaoDynamo(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient, PnActionManagerConfigs cfg) {
-        this.table = dynamoDbEnhancedAsyncClient.table(cfg.getFutureActionDao().getTableName(), TableSchema.fromClass(FutureActionEntity.class));
+        //this.table = dynamoDbEnhancedAsyncClient.table(cfg.getFutureActionDao().getTableName(), TableSchema.fromClass(FutureActionEntity.class));
+
+        //todo add addAttribute for staticTableSchema
+        StaticTableSchema<FutureActionEntity> schemaTable = StaticTableSchema.builder(FutureActionEntity.class)
+                .newItemSupplier(FutureActionEntity::new)
+                .addAttribute(String.class, a -> a.name(FutureActionEntity.FIELD_TIME_SLOT)
+                        .getter(FutureActionEntity::getTimelineId)
+                        .setter(FutureActionEntity::setTimelineId)
+                        .tags(primaryPartitionKey())
+                )
+                .addAttribute(String.class, a -> a.name(FutureActionEntity.FIELD_ACTION_ID)
+                        .getter(FutureActionEntity::getActionId)
+                        .setter(FutureActionEntity::setActionId)
+                        .tags(primarySortKey())
+                )
+                .addAttribute(String.class, a -> a.name(FutureActionEntity.FIELD_IUN)
+                        .getter(FutureActionEntity::getIun)
+                        .setter(FutureActionEntity::setIun)
+                )
+                .addAttribute(Instant.class, a -> a.name(FutureActionEntity.FIELD_NOT_BEFORE)
+                        .getter(FutureActionEntity::getNotBefore)
+                        .setter(FutureActionEntity::setNotBefore)
+                )
+                .addAttribute(Integer.class, a -> a.name(FutureActionEntity.FIELD_RECIPIENT_INDEX)
+                        .getter(FutureActionEntity::getRecipientIndex)
+                        .setter(FutureActionEntity::setRecipientIndex)
+                )
+                .addAttribute(Boolean.class, a -> a.name(FutureActionEntity.FIELD_LOGICAL_DELETED)
+                        .getter(FutureActionEntity::getLogicalDeleted)
+                        .setter(FutureActionEntity::setLogicalDeleted)
+                )
+                .addAttribute(String.class, a -> a.name(FutureActionEntity.FIELD_TIMELINE_ID)
+                        .getter(FutureActionEntity::getTimelineId)
+                        .setter(FutureActionEntity::setTimelineId)
+                )
+                /*
+                .addAttribute(ActionDetailsEntity.class, a -> a.name(FutureActionEntity.FIELD_DETAILS)
+                        .getter(FutureActionEntity::getDetails)
+                        .setter(FutureActionEntity::setDetails)
+                )
+                */
+                .build();
+
+        this.table = dynamoDbEnhancedAsyncClient.table(cfg.getFutureActionDao().getTableName(), schemaTable);
+
+
     }
 
     @Override

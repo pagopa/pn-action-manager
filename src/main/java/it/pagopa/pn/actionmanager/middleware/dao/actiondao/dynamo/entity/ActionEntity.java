@@ -18,6 +18,14 @@ import java.util.Map;
 @Setter
 public class ActionEntity {
   public static final String FIELD_ACTION_ID = "actionId";
+  public static final String FIELD_IUN = "iun";
+  public static final String FIELD_NOT_BEFORE = "notBefore";
+  public static final String FIELD_TYPE = "type";
+  public static final String FIELD_RECIPIENT_INDEX = "recipientIndex";
+  public static final String FIELD_TIMESLOT = "timeslot";
+  public static final String FIELD_TIMELINE_ID = "timelineId";
+  public static final String FIELD_TTL = "ttl";
+  public static final String FIELD_DETAILS = "details";
 
   private String actionId;
   private String iun;
