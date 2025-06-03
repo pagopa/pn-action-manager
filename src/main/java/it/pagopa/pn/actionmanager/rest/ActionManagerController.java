@@ -24,8 +24,8 @@ public class ActionManagerController implements ActionApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> unscheduleAction(String actionId, String timeslot, final ServerWebExchange exchange) {
-        return actionService.unscheduleAction(timeslot, actionId)
+    public Mono<ResponseEntity<Void>> unscheduleAction(String actionId, final ServerWebExchange exchange) {
+        return actionService.unscheduleAction(actionId)
                 .thenReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
     }
 }

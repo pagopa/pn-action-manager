@@ -5,4 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface ActionDao {
     Mono<Void> addOnlyActionIfAbsent(Action action);
+    Mono<Action> getAction(String actionId);
 }

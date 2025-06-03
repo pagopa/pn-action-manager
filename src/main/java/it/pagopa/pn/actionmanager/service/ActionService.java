@@ -7,5 +7,7 @@ import reactor.core.publisher.Mono;
 public interface ActionService {
 
     Mono<Void> addOnlyActionIfAbsent(Action action);
-    Mono<Void> unscheduleAction(String timeSlot, String actionId);
+
+    Mono<Void> unscheduleAction(String actionId);
+
 }

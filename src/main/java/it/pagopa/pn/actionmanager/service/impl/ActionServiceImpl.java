@@ -46,8 +46,14 @@ public class ActionServiceImpl implements ActionService {
     }
 
     @Override
-    public Mono<Void> unscheduleAction(String timeSlot, String actionId){
-        log.info("unscheduleAction timeSlot={} actionId={}", timeSlot, actionId);
-        return futureActionDao.unscheduleAction(timeSlot, actionId);
+    public Mono<Void> unscheduleAction( String actionId){
+        log.info("unscheduleAction actionId={}", actionId);
+        return getAction(actionId)
+                .flatMap(r -> futureActionDao.unscheduleAction(r.getTimeslot(), actionId));
+    }
+
+    private Mono<Action> getAction(String actionId) {
+        log.info("getAction actionId={}", actionId);
+        return actionDao.getAction(actionId);
     }
 }

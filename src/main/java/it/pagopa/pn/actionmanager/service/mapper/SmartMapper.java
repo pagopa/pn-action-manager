@@ -47,4 +47,13 @@ public class SmartMapper {
             throw new IllegalArgumentException("Error in JSON deserialization", e);
         }
     }
+
+    public String mapFromMapToJsonString(Map<String, Object> source) {
+        try {
+            return objectMapper.writeValueAsString(source);
+        } catch (JsonProcessingException e) {
+            log.error("Error in JSON = {} deserialization", source);
+            throw new IllegalArgumentException("Error in JSON serialization", e);
+        }
+    }
 }

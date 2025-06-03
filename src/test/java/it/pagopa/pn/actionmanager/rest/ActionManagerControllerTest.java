@@ -48,13 +48,11 @@ class ActionManagerControllerTest {
     @Test
     void testUnscheduleAction() {
         String actionId = "testActionId";
-        String timeslot = "testtimeslot";
+        when(actionService.unscheduleAction(anyString())).thenReturn(Mono.empty());
 
-        when(actionService.unscheduleAction(anyString(), anyString())).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> response = actionManagerController.unscheduleAction(actionId, timeslot, mock(ServerWebExchange.class));
+        Mono<ResponseEntity<Void>> response = actionManagerController.unscheduleAction(actionId, mock(ServerWebExchange.class));
 
         assertEquals(ResponseEntity.status(204).build(), response.block());
-        verify(actionService, times(1)).unscheduleAction(timeslot, actionId);
+        verify(actionService, times(1)).unscheduleAction(actionId);
     }
 }
