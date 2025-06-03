@@ -18,6 +18,7 @@ public class EntityToDtoActionMapper {
                 .actionId(entity.getActionId())
                 .notBefore(entity.getNotBefore())
                 .recipientIndex(entity.getRecipientIndex())
+                .createdAt(entity.getCreatedAt())
                 .type(entity.getType())
                 .timeslot(entity.getTimeslot())
                 .timelineId(entity.getTimelineId())
