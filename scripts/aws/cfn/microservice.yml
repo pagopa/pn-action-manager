@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Example microservice deploy'
+Description: 'Microservice deploy for pn-action-manager'
 Transform:
   - UpdateDeploymentTransform
 
@@ -81,6 +81,10 @@ Parameters:
 
   ActionRemoverManagerLambdaName:
     Type: String
+
+  ActionDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing'
 
   LastPollForFutureActionDynamoTableArn:
     Type: String
@@ -215,6 +219,16 @@ Parameters:
       - "true"
       - "false"
 
+  ApplicativeEnvFileChecksum:
+    Type: String
+    Default: ''
+    Description: 'Applicative environment variable file checksum'
+
+  LambdaRuntime:
+    Type: String
+    Default: nodejs20.x
+    Description: Runtime for Lambdas.
+
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -229,6 +243,9 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
+        ContainerEnvEntry2: !Sub 'PN_ACTIONMANAGER_FUTUREACTIONDAO_TABLENAME=${FutureActionDynamoTableName}'
+        ContainerEnvEntry3: !Sub 'PN_ACTIONMANAGER_ACTIONDAO_TABLENAME=${ActionDynamoTableName}'
+        ApplicativeEnvFileChecksum: !Ref ApplicativeEnvFileChecksum
         MappedPaths: '/action-manager-private/*'
         ContainerEnvEntry4: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
         ContainerEnvEntry5: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
@@ -245,6 +262,24 @@ Resources:
         MountEfs: !Ref MountEfs
         WireTapLogActivation: !Ref WireTapLogActivation
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
+        TaskRoleManagedPolicyArn: !Ref ActionManagerTaskManagedPolicy
+
+  ActionManagerTaskManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "dynamodb:PutItem"
+            Resource:
+              - !Ref ActionDynamoTableArn
+          - Effect: Allow
+            Action:
+              - "dynamodb:UpdateItem"
+            Resource:
+              - !Ref FutureActionDynamoTableArn
 
   # CDC To ActionEnqueuer
   ActionEnqueuerManagerKinesisSource:
@@ -270,7 +305,7 @@ Resources:
     Type: AWS::Lambda::LayerVersion
     Properties:
       CompatibleRuntimes:
-        - nodejs18.x
+        - !Ref LambdaRuntime
       Content:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_libs.zip"
@@ -290,7 +325,7 @@ Resources:
         FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_code.zip"
         MemorySize: 512
         Timeout: 10
-        Runtime: nodejs18.x
+        Runtime: !Ref LambdaRuntime
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionEnqueuerManagerLambdaRole.Arn
         Layer1: !Ref ActionEnqueuerManagerLambdaLibrariesLayer
@@ -367,7 +402,7 @@ Resources:
     Type: AWS::Lambda::LayerVersion
     Properties:
       CompatibleRuntimes:
-        - nodejs18.x
+        - !Ref LambdaRuntime
       Content:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_libs.zip"
@@ -388,7 +423,7 @@ Resources:
         FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_code.zip"
         MemorySize: 512
         Timeout: 10
-        Runtime: nodejs18.x
+        Runtime: !Ref LambdaRuntime
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRemoverManagerLambdaRole.Arn
         Layer1: !Ref ActionRemoverManagerLambdaLibrariesLayer
@@ -509,7 +544,7 @@ Resources:
     Type: AWS::Lambda::LayerVersion
     Properties:
       CompatibleRuntimes:
-        - nodejs18.x
+        - !Ref LambdaRuntime
       Content:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_libs.zip"
@@ -529,7 +564,7 @@ Resources:
         FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_code.zip"
         MemorySize: 512
         Timeout: 10
-        Runtime: nodejs18.x
+        Runtime: !Ref LambdaRuntime
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRouterLambdaRole.Arn
         Layer1: !Ref ActionRouterLambdaLibrariesLayer
@@ -602,6 +637,3 @@ Resources:
               - "dynamodb:BatchWriteItem"
             Resource:
               - !Ref FutureActionDynamoTableArn
-
-
-

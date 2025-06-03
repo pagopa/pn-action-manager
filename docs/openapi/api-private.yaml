@@ -1,0 +1,145 @@
+openapi: 3.0.1
+info:
+  termsOfService: https://notifichedigitali.pagopa.it/pubbliche-amministrazioni/index.html
+  title: OpenAPI definition
+  version: '1.0.0'
+  description: api-internal-action-manager
+  x-summary: sample api for action manager
+  contact:
+    email: pn@pagopa.it
+  license:
+    name: Licenza di PN
+    url: "https://notifichedigitali.pagopa.it/pubbliche-amministrazioni/index.html"
+servers:
+  - url: https://localhost:8080
+    description: Generated server url
+tags:
+  - name: Action
+paths:
+  /action-manager-private/action:
+    post:
+      tags:
+        - Action
+      summary: Inserisce una nuova azione
+      description: Inserisce una nuova azione che può essere programmata per il futuro in base al valore del campo notBefore.
+      operationId: insertAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewAction"
+      responses:
+        "201":
+          description: Richiesta accettata, in corso di elaborazione
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'remote-refs.yaml#/components/schemas/Problem'
+        "409":
+          description: Conflitto, l'azione è già stata programmata
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'remote-refs.yaml#/components/schemas/Problem'
+        "500":
+          description: Internal error
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'remote-refs.yaml#/components/schemas/Problem'
+
+  /action-manager-private/action/{actionId}/unschedule:
+    put:
+      tags:
+        - Action
+      summary: Annulla l'azione programmata
+      description: Annulla l'azione programmata associata a un determinato slot temporale.
+      operationId: unscheduleAction
+      parameters:
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identificativo univoco dell'azione.
+      responses:
+        "204":
+          description: Modifica effettuata con successo
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'remote-refs.yaml#/components/schemas/Problem'
+        "404":
+          description: Action non trovata
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'remote-refs.yaml#/components/schemas/Problem'
+        "500":
+          description: Internal error
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'remote-refs.yaml#/components/schemas/Problem'
+
+components:
+
+  schemas:
+
+    NewAction:
+      required:
+        - actionId
+        - iun
+        - type
+        - notBefore
+      type: object
+      properties:
+        actionId:
+          type: string
+          description: Identificativo univoco dell'azione.
+        iun:
+          type: string
+          description: Identificativo univoco della notifica.
+        type:
+          $ref: "#/components/schemas/ActionType"
+        notBefore:
+          type: string
+          format: date-time
+          description: Data e ora prima della quale l'azione non deve essere eseguita.
+        recipientIndex:
+          type: integer
+          description: Indice del destinatario, richiesto per alcuni tipi di azione.
+        timelineId:
+          type: string
+          description: ID della timeline associata all'azione.
+        details:
+          type: string
+          description: Quando fornito deve essere un Json valido.
+
+    ActionType:
+      type: string
+      description: Tipo di azione da eseguire (influenza la destinazione dell'evento inviato dall'applicazione).
+      enum:
+        - NOTIFICATION_VALIDATION
+        - NOTIFICATION_REFUSED
+        - NOTIFICATION_CANCELLATION
+        - SCHEDULE_RECEIVED_LEGALFACT_GENERATION
+        - CHECK_ATTACHMENT_RETENTION
+        - START_RECIPIENT_WORKFLOW
+        - CHOOSE_DELIVERY_MODE
+        - ANALOG_WORKFLOW
+        - DIGITAL_WORKFLOW_NEXT_ACTION
+        - DIGITAL_WORKFLOW_NEXT_EXECUTE_ACTION
+        - DIGITAL_WORKFLOW_NO_RESPONSE_TIMEOUT_ACTION
+        - DIGITAL_WORKFLOW_RETRY_ACTION
+        - SEND_DIGITAL_FINAL_STATUS_RESPONSE
+        - REFINEMENT_NOTIFICATION
+        - SENDER_ACK
+        - DOCUMENT_CREATION_RESPONSE
+        - POST_ACCEPTED_PROCESSING_COMPLETED
+        - SEND_ANALOG_FINAL_STATUS_RESPONSE
