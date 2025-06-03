@@ -38,13 +38,18 @@ class ActionServiceImplTest {
     }
 
     @Test
-    void unscheduleAction(){
+    void unscheduleAction() {
         String timeSlot = "2021-09-16T15:24";
         String actionId = "001";
+        Action action = Action.builder()
+                .actionId(actionId)
+                .timeslot(timeSlot)
+                .build();
 
+        Mockito.when(actionDao.getAction(actionId)).thenReturn(Mono.just(action));
         Mockito.when(futureActionDao.unscheduleAction(timeSlot, actionId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(actionService.unscheduleAction(timeSlot, actionId))
+        StepVerifier.create(actionService.unscheduleAction(actionId))
                 .verifyComplete();
 
         // Verifica che il DAO sia stato chiamato con l'oggetto corretto
