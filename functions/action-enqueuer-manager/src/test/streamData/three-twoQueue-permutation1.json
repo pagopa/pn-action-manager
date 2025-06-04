@@ -32,7 +32,9 @@
               "actionId": {
                 "S": "actionId-queue2"
               },
-
+              "createdAt": {
+                "S": "2024-05-12T12:22:22"
+              },
               "type": {
                 "S": "NOTIFICATION_VALIDATION"
               }
@@ -82,7 +84,9 @@
               "actionId": {
                 "S": "actionId-queue1"
               },
-
+              "createdAt": {
+                "S": "2024-05-12T12:22:22"
+              },
               "type": {
                 "S": "NOTIFICATION_CREATION"
               }
@@ -132,7 +136,9 @@
               "actionId": {
                 "S": "actionId-queue1"
               },
-
+              "createdAt": {
+                "S": "2024-05-12T12:22:22"
+              },
               "type": {
                 "S": "NOTIFICATION_CREATION"
               }
