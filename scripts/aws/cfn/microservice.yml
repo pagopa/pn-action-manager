@@ -242,6 +242,7 @@ Resources:
           - Effect: Allow
             Action:
               - "dynamodb:PutItem"
+              - "dynamodb:GetItem"
             Resource:
               - !Ref ActionDynamoTableArn
           - Effect: Allow
