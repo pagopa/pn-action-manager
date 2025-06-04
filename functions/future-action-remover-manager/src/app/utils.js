@@ -35,14 +35,6 @@ const chunkIntoN = (arr, chunkSize, discardFun) => {
   return  {chunks, discarded};
 };
 
-const isLambdaDisabled = (featureFlag) => {
-  const currentDate = new Date().toISOString();
-  const { start, end } = featureFlag;
-
-  return currentDate < start || currentDate > end;
-};
-
 module.exports = {
-  chunkIntoN,
-  isLambdaDisabled
+  chunkIntoN
 };
