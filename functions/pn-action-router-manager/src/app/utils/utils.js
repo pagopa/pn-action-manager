@@ -38,11 +38,4 @@ function addDaysToDate(startDate, daysToAdd) {
     return unixTimestamp;
 }
 
-const isLambdaDisabled = (featureFlag) => {
-  const currentDate = new Date().toISOString();
-  const { start, end } = featureFlag;
-
-  return currentDate < start || currentDate > end;
-};
-
-module.exports = { isRecordToSend, isTimeToLeave, isFutureAction, addDaysToDate, isLambdaDisabled};
+module.exports = { isRecordToSend, isTimeToLeave, isFutureAction, addDaysToDate };

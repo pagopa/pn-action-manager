@@ -99,6 +99,7 @@ function getFutureAction(action){
     timelineId: action.timelineId,
     iun: action.iun,
     details: action.details,
+    createdAt: action.createdAt,
     ttl: ttl
   };
 

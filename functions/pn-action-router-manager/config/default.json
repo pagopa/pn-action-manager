@@ -14,8 +14,8 @@
     "RequestTimeoutException"
   ],
   "featureFlag": {
-    "start": "2030-04-30T12:00",
-    "end": "2099-04-30T12:00"
+    "start": "2024-05-10T12:00",
+    "end": "2099-05-30T12:00"
   },
   "QUEUE_ENDPOINTS_ENV_VARIABLE": "QUEUE_URL_MAP",
   "ACTION_MAP_ENV_VARIABLE": "ACTION_QUEUE_MAP",
