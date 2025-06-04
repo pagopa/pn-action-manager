@@ -87,7 +87,7 @@ async function handleEvent(event, context) {
     batchItemFailures: [],
   };
 
-  const workingTime = await getWorkingTime();
+  const workingTime = getWorkingTime();
 
   console.log("[ACTION_ENQUEUER]", "Started");
   console.log("[ACTION_ENQUEUER]", "Event DATA", event);
