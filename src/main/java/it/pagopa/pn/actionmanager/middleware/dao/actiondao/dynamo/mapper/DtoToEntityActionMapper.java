@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class DtoToEntityActionMapper {
                 .actionId(dto.getActionId())
                 .notBefore(dto.getNotBefore())
                 .recipientIndex(dto.getRecipientIndex())
+                .createdAt(Instant.now())
                 .type(dto.getType())
                 .timeslot(dto.getTimeslot())
                 .timelineId(dto.getTimelineId())

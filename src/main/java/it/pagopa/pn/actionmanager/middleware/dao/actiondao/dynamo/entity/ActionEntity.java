@@ -26,6 +26,7 @@ public class ActionEntity {
   private Integer recipientIndex;
   private String timeslot;
   private String timelineId;
+  private Instant createdAt;
   private long ttl;
   private Map<String,Object> details;
 

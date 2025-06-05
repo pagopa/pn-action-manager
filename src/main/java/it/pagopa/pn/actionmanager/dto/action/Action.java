@@ -18,6 +18,8 @@ public class Action {
 
     private Instant notBefore;
 
+    private Instant createdAt;
+
     private ActionType type;
 
     private Boolean logicalDeleted;

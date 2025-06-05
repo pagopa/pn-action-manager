@@ -105,6 +105,7 @@ class ActionDaoDynamoTest {
         return Action.builder()
                 .iun("01")
                 .actionId("02")
+                .createdAt(Instant.now())
                 .notBefore(instant)
                 .type(ActionType.ANALOG_WORKFLOW)
                 .recipientIndex(3)
