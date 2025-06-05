@@ -11,7 +11,7 @@ const getWorkingTime = () => {
 
 const insideWorkingWindow = (action, startWw, endWs) => {
   if (action && action?.createdAt)
-    return action.createdAt <= endWs && action.createdAt >= startWw;
+    return action.createdAt < endWs && action.createdAt >= startWw;
   console.log("[ACTION_ROUTER]", `Action doesn't have createdAt attribute`, action);
   return false;
 };

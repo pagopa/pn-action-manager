@@ -131,7 +131,7 @@ describe("dynamoFunctions tests", function () {
         ":tS": keyValue,
         ":tE": keyValue,
       },
-      FilterExpression: "attribute_exists(createdAt) AND createdAt >= :tS AND createdAt <= :tE",
+      FilterExpression: "attribute_exists(createdAt) AND createdAt >= :tS AND createdAt < :tE",
     };
 
     const resultItems = [];
@@ -162,7 +162,7 @@ describe("dynamoFunctions tests", function () {
         ":tS": keyValue,
         ":tE": keyValue,
       },
-      FilterExpression: "attribute_exists(createdAt) AND createdAt >= :tS AND createdAt <= :tE",
+      FilterExpression: "attribute_exists(createdAt) AND createdAt >= :tS AND createdAt < :tE",
     };
     const resultItems = [{ iun: "iunTest" }];
 

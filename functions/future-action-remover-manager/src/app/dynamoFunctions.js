@@ -34,7 +34,7 @@ async function getActionsByTimeSlot(
       ":tS": startTime,
       ":tE": endTime,
     },
-    FilterExpression: "attribute_exists(createdAt) AND createdAt >= :tS AND createdAt <= :tE",
+    FilterExpression: "attribute_exists(createdAt) AND createdAt >= :tS AND createdAt < :tE",
   };
 
   console.debug(
