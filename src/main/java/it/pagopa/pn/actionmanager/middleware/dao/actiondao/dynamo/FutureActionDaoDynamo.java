@@ -4,9 +4,11 @@ import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.FutureActionEntity;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.ActionDetailsConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
@@ -15,6 +17,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.Instant;
+import java.util.Map;
 
 import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCodes.ERROR_CODE_FUTURE_ACTION_NOTFOUND;
 import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
@@ -26,9 +29,10 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
     private final DynamoDbAsyncTable<FutureActionEntity> table;
 
     protected FutureActionDaoDynamo(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient, PnActionManagerConfigs cfg) {
-        //this.table = dynamoDbEnhancedAsyncClient.table(cfg.getFutureActionDao().getTableName(), TableSchema.fromClass(FutureActionEntity.class));
+        this.table = initializeTable(cfg.getFutureActionDao().getTableName(), dynamoDbEnhancedAsyncClient);
+    }
 
-        //todo add addAttribute for staticTableSchema
+    private DynamoDbAsyncTable<FutureActionEntity> initializeTable(String tableName, DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient) {
         StaticTableSchema<FutureActionEntity> schemaTable = StaticTableSchema.builder(FutureActionEntity.class)
                 .newItemSupplier(FutureActionEntity::new)
                 .addAttribute(String.class, a -> a.name(FutureActionEntity.FIELD_TIME_SLOT)
@@ -60,23 +64,17 @@ public class FutureActionDaoDynamo  implements FutureActionDao {
                 .addAttribute(String.class, a -> a.name(FutureActionEntity.FIELD_TIMELINE_ID)
                         .getter(FutureActionEntity::getTimelineId)
                         .setter(FutureActionEntity::setTimelineId)
-                ).build();
-                /*
-                .addAttribute(ActionDetailsEntity.class, a -> a.name(FutureActionEntity.FIELD_DETAILS)
+                )
+                .addAttribute(Map.class, a -> a.name(FutureActionEntity.FIELD_DETAILS)
                         .getter(FutureActionEntity::getDetails)
                         .setter(FutureActionEntity::setDetails)
-                )
+                        .attributeConverter((AttributeConverter) new ActionDetailsConverter())
+                ).build();
 
-                 */
-
-
-
-        this.table = dynamoDbEnhancedAsyncClient.table(cfg.getFutureActionDao().getTableName(), schemaTable);
-
-
+        return dynamoDbEnhancedAsyncClient.table(tableName, schemaTable);
     }
 
-    @Override
+        @Override
     public Mono<Void> unscheduleAction(String timeSlot, String actionId) {
         String keyConditionExpression = String.format("%s = :timeSlot AND %s = :actionId",
                 FutureActionEntity.FIELD_TIME_SLOT, FutureActionEntity.FIELD_ACTION_ID);

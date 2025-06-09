@@ -7,6 +7,7 @@ import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.ActionDetailsConverter;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.DtoToEntityActionMapper;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.EntityToDtoActionMapper;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
@@ -17,10 +18,8 @@ import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.Instant;
 import java.util.Map;
 
@@ -28,7 +27,6 @@ import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCode
 import static it.pagopa.pn.actionmanager.exceptions.PnActionManagerExceptionCodes.ERROR_CODE_ACTION_NOT_FOUND;
 import static it.pagopa.pn.commons.abstractions.impl.AbstractDynamoKeyValueStore.ATTRIBUTE_NOT_EXISTS;
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
-import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
 import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
 
 @Component
@@ -43,7 +41,11 @@ public class ActionDaoDynamo implements ActionDao {
                            PnActionManagerConfigs pnActionManagerConfigs, DtoToEntityActionMapper dtoToEntityActionMapper, EntityToDtoActionMapper entityToDtoActionMapper) {
         this.dtoToEntityActionMapper = dtoToEntityActionMapper;
         this.entityToDtoActionMapper = entityToDtoActionMapper;
-        //todo add addAttribute for staticTableSchema
+        this.table = initializeTable(pnActionManagerConfigs.getActionDao().getTableName(), dynamoDbEnhancedAsyncClient);
+        this.actionTtl = fromStringDaysToDuration(pnActionManagerConfigs.getActionTtlDays());
+    }
+
+    private DynamoDbAsyncTable<ActionEntity> initializeTable(String tableName, DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient) {
         StaticTableSchema<ActionEntity> schemaTable = StaticTableSchema.builder(ActionEntity.class)
                 .newItemSupplier(ActionEntity::new)
                 .addAttribute(String.class, a -> a.name(ActionEntity.FIELD_ACTION_ID)
@@ -75,22 +77,18 @@ public class ActionDaoDynamo implements ActionDao {
                         .getter(ActionEntity::getTtl)
                         .setter(ActionEntity::setTtl)
                 )
-                /*
                 .addAttribute(Map.class, a -> a.name(ActionEntity.FIELD_DETAILS)
                         .getter(ActionEntity::getDetails)
                         .setter(ActionEntity::setDetails)
+                        .attributeConverter((AttributeConverter) new ActionDetailsConverter())
                 )
                 .addAttribute(ActionType.class, a -> a.name(ActionEntity.FIELD_TYPE)
                         .getter(ActionEntity::getType)
                         .setter(ActionEntity::setType)
-                )*/
+                )
                 .build();
 
-
-        this.table = dynamoDbEnhancedAsyncClient.table(pnActionManagerConfigs.getActionDao().getTableName(), schemaTable);
-
-
-        this.actionTtl = fromStringDaysToDuration(pnActionManagerConfigs.getActionTtlDays());        this.actionTtl = fromStringDaysToDuration(pnActionManagerConfigs.getActionTtlDays());
+        return dynamoDbEnhancedAsyncClient.table(tableName, schemaTable);
     }
 
     private static Duration fromStringDaysToDuration(String daysToFormat) {
