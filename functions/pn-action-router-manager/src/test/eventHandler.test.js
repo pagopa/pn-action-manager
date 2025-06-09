@@ -22,8 +22,7 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
         var date = new Date();
         let isoDateNow = date.toISOString();
         return isoDateNow < notBefore;
-      },
-      isLambdaDisabled: (featureFlag) => false
+      }
     },
 
     "./sqs/writeToSqs.js": {
@@ -70,7 +69,7 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
     },
 });
 
-describe("eventHandlerTest (lambda enabled)", function () {
+describe("eventHandlerTest", function () {
   let queueAction1Url = "https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions1";
   let queueAction2Url = "https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions2";
 
@@ -150,7 +149,6 @@ describe("eventHandlerTest (lambda enabled)", function () {
 
     //Vengono definite le action da sottoporre al test
     let futureAction1Data = getData('futureAction1', futureActionDate, 'REFINEMENT', true, isActionToFail, null);
-
     //Viene definito l'array delle action inserite
     let arrayInsertedData = [futureAction1Data];
     
@@ -264,25 +262,6 @@ describe("eventHandlerTest (lambda enabled)", function () {
   });
 });
 
-describe("eventHandlerTest (lambda disabled)", function () {
-  it("should return OK response when lambda is disabled (featureFlag)", async () => {
-    const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./utils/utils.js": {
-        isLambdaDisabled: (featureFlag) => true
-      }
-    });
-    
-    const res = await eventHandler.handleEvent({}, {});
-
-    //THEN
-    //Viene verificato che non ci siano item per la quale la put su dynamo o in coda sia fallita
-    expect(res).deep.equals({
-      batchItemFailures: [],
-    });
-  });
-  
-});
-
 function checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue, actionToQueueNameMap, queueNameMapToQueueUrlMap){
   for (var i = 0; i < arrayInsertedData.length; i++) {
     let actionData = arrayInsertedData[i];
@@ -339,6 +318,9 @@ function getData(actionId, notBefore, actionType, isFutureAction, isActionToFail
              "S":"timelineId1"
           },
           "notBefore":{
+             "S": notBefore
+          },
+          "createdAt":{
              "S": notBefore
           },
           "recipientIndex":{

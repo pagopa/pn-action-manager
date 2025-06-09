@@ -51,7 +51,7 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
 
-  /action-manager-private/action/{actionId}/{timeSlot}/unschedule:
+  /action-manager-private/action/{actionId}/unschedule:
     put:
       tags:
         - Action
@@ -65,12 +65,6 @@ paths:
           schema:
             type: string
           description: Identificativo univoco dell'azione.
-        - name: timeSlot
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Slot temporale associato all'azione.
       responses:
         "204":
           description: Modifica effettuata con successo

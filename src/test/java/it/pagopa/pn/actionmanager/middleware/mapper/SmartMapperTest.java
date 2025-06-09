@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,5 +58,42 @@ class SmartMapperTest {
         Map<String, Object> result = smartMapper.mapFromJsonStringToMap(emptyJson);
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+
+    @Test
+    void mapFromMapToJsonString_validMap_returnsJsonString() {
+
+        Map<String, Object> source = new HashMap<>();
+        source.put("key", "value");
+        source.put("num", 123);
+        source.put("bool", true);
+
+        String result = smartMapper.mapFromMapToJsonString(source);
+
+        assertNotNull(result);
+        assertTrue(result.contains("\"key\":\"value\""));
+        assertTrue(result.contains("\"num\":123"));
+        assertTrue(result.contains("\"bool\":true"));
+    }
+
+    @Test
+    void mapFromMapToJsonString_emptyMap_returnsEmptyJsonString() {
+
+        Map<String, Object> source = new HashMap<>();
+        String result = smartMapper.mapFromMapToJsonString(source);
+        assertNotNull(result);
+        assertEquals("{}", result);
+    }
+
+    @Test
+    void mapFromMapToJsonString_invalidMap_throwsIllegalArgumentException() {
+        Map<String, Object> source = new HashMap<>();
+        source.put("key", new Object()); // Non-serializable object
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                smartMapper.mapFromMapToJsonString(source)
+        );
+        assertTrue(ex.getMessage().contains("Error in JSON serialization"));
     }
 }

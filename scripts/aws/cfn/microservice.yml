@@ -198,6 +198,11 @@ Parameters:
     Default: ''
     Description: 'Applicative environment variable file checksum'
 
+  LambdaRuntime:
+    Type: String
+    Default: nodejs20.x
+    Description: Runtime for Lambdas.
+
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -237,6 +242,7 @@ Resources:
           - Effect: Allow
             Action:
               - "dynamodb:PutItem"
+              - "dynamodb:GetItem"
             Resource:
               - !Ref ActionDynamoTableArn
           - Effect: Allow
@@ -269,7 +275,7 @@ Resources:
     Type: AWS::Lambda::LayerVersion
     Properties:
       CompatibleRuntimes:
-        - nodejs18.x
+        - !Ref LambdaRuntime
       Content:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_libs.zip"
@@ -289,7 +295,7 @@ Resources:
         FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/action-enqueuer-manager_code.zip"
         MemorySize: 512
         Timeout: 10
-        Runtime: nodejs18.x
+        Runtime: !Ref LambdaRuntime
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionEnqueuerManagerLambdaRole.Arn
         Layer1: !Ref ActionEnqueuerManagerLambdaLibrariesLayer
@@ -366,7 +372,7 @@ Resources:
     Type: AWS::Lambda::LayerVersion
     Properties:
       CompatibleRuntimes:
-        - nodejs18.x
+        - !Ref LambdaRuntime
       Content:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_libs.zip"
@@ -387,7 +393,7 @@ Resources:
         FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/future-action-remover-manager_code.zip"
         MemorySize: 512
         Timeout: 10
-        Runtime: nodejs18.x
+        Runtime: !Ref LambdaRuntime
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRemoverManagerLambdaRole.Arn
         Layer1: !Ref ActionRemoverManagerLambdaLibrariesLayer
@@ -508,7 +514,7 @@ Resources:
     Type: AWS::Lambda::LayerVersion
     Properties:
       CompatibleRuntimes:
-        - nodejs18.x
+        - !Ref LambdaRuntime
       Content:
         S3Bucket: !Ref MicroserviceBucketName
         S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_libs.zip"
@@ -528,7 +534,7 @@ Resources:
         FunctionBucketKey: !Sub "${MicroserviceBucketBaseKey}/functions_zip/pn-action-router-manager_code.zip"
         MemorySize: 512
         Timeout: 10
-        Runtime: nodejs18.x
+        Runtime: !Ref LambdaRuntime
         TracingConfigMode: "Active"
         RoleArn: !GetAtt ActionRouterLambdaRole.Arn
         Layer1: !Ref ActionRouterLambdaLibrariesLayer

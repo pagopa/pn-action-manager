@@ -6,6 +6,7 @@ import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.DtoToEntityActionMapper;
+import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.EntityToDtoActionMapper;
 import it.pagopa.pn.actionmanager.service.mapper.SmartMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +16,14 @@ import org.mockito.Mockito;
 import reactor.test.StepVerifier;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,8 +63,9 @@ class ActionDaoDynamoTest {
         when(smartMapper.mapFromJsonStringToMap(Mockito.anyString()))
                 .thenReturn(new HashMap<>());
         DtoToEntityActionMapper dtoToEntityActionMapper = new DtoToEntityActionMapper(smartMapper);
+        EntityToDtoActionMapper entityToDtoActionMapper = new EntityToDtoActionMapper(smartMapper);
 
-        actionDaoDynamo = new ActionDaoDynamo(dynamoDbEnhancedClient, pnActionManagerConfigs, dtoToEntityActionMapper);
+        actionDaoDynamo = new ActionDaoDynamo(dynamoDbEnhancedClient, pnActionManagerConfigs, dtoToEntityActionMapper, entityToDtoActionMapper);
     }
 
     @Test
@@ -101,10 +105,40 @@ class ActionDaoDynamoTest {
         return Action.builder()
                 .iun("01")
                 .actionId("02")
+                .createdAt(Instant.now())
                 .notBefore(instant)
                 .type(ActionType.ANALOG_WORKFLOW)
                 .recipientIndex(3)
                 .build();
     }
 
+    @Test
+    void getAction() {
+        Action action = buildAction();
+        ActionEntity actionEntity = new ActionEntity();
+        Map<String, Object> details = new HashMap<>();
+        details.put("key", "value");
+        actionEntity.setActionId("02");
+        actionEntity.setDetails(details);
+
+        when(table.getItem(Mockito.any(Key.class)))
+                .thenReturn(CompletableFuture.completedFuture(actionEntity));
+
+        StepVerifier.create(actionDaoDynamo.getAction("02"))
+                .expectNextMatches(retrievedAction -> {
+                    assertEquals(action.getActionId(), retrievedAction.getActionId());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getActionNotFound() {
+        when(table.getItem(Mockito.any(Key.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        StepVerifier.create(actionDaoDynamo.getAction("non-existent-action-id"))
+                .expectErrorMessage("Not found")
+                .verify();
+    }
 }
