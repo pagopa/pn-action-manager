@@ -7,7 +7,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import jakarta.annotation.PostConstruct;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableScheduling
 @Configuration
 @ConfigurationProperties(prefix = "pn.action-manager")
 @Data
