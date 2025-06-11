@@ -429,7 +429,7 @@ Resources:
         RoleArn: !GetAtt ActionRemoverManagerLambdaRole.Arn
         Layer1: !Ref ActionRemoverManagerLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "LAST_WORKED_KEY=2###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
+          "LAST_WORKED_KEY=3###LAMBDA_ENABLED_START=${LambdaEnabledStart}###LAMBDA_ENABLED_END=${LambdaEnabledEnd}",
           {
             LambdaEnabledStart: !Ref ActionLambdasEnabledStart,
             LambdaEnabledEnd: !Ref ActionLambdasEnabledEnd
