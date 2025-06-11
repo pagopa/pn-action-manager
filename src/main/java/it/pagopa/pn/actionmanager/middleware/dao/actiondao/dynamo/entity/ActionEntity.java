@@ -26,6 +26,7 @@ public class ActionEntity {
   public static final String FIELD_TIMELINE_ID = "timelineId";
   public static final String FIELD_TTL = "ttl";
   public static final String FIELD_DETAILS = "details";
+  public static final String FIELD_CREATED_AT = "createdAt";
 
   private String actionId;
   private String iun;

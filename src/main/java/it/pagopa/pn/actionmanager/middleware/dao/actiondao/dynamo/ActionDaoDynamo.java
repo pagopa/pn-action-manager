@@ -86,6 +86,10 @@ public class ActionDaoDynamo implements ActionDao {
                         .getter(ActionEntity::getType)
                         .setter(ActionEntity::setType)
                 )
+                .addAttribute(Instant.class, a -> a.name(ActionEntity.FIELD_CREATED_AT)
+                        .getter(ActionEntity::getCreatedAt)
+                        .setter(ActionEntity::setCreatedAt)
+                )
                 .build();
 
         return dynamoDbEnhancedAsyncClient.table(tableName, schemaTable);
