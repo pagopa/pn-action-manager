@@ -18,6 +18,13 @@ import java.util.Map;
 public class FutureActionEntity {
     public static final String FIELD_TIME_SLOT = "timeSlot";
     public static final String FIELD_ACTION_ID = "actionId";
+    public static final String FIELD_IUN = "iun";
+    public static final String FIELD_NOT_BEFORE = "notBefore";
+    public static final String FIELD_TYPE = "type";
+    public static final String FIELD_RECIPIENT_INDEX = "recipientIndex";
+    public static final String FIELD_TIMELINE_ID = "timelineId";
+    public static final String FIELD_DETAILS = "details";
+    public static final String FIELD_LOGICAL_DELETED = "logicalDeleted";
 
     private String timeSlot;
     private String actionId;
