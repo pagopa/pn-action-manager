@@ -1,0 +1,26 @@
+services:
+  # AWS LocalStack - servizi abilitati Lambda,S3,dynamodb con Node.js integrato
+  localstack:
+    build: .  # Usa il Dockerfile per buildare l'immagine con Node.js
+    # Oppure se hai già buildato l'immagine:
+    # image: localstack-nodejs:latest
+    ports:
+      - '4566-4583:4566-4583'
+    environment:
+      - SERVICES=lambda,s3,sqs,dynamodb,sns,secretsmanager,cloudwatch,ssm,ses,kinesis,events,logs
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./src/test/resources/testcontainers/credentials:/home/localstack/.aws/credentials"
+      - "./src/test/resources/testcontainers/init.sh:/etc/localstack/init/ready.d/make-storages.sh"
+      - './src/functions/config/action-enqueuer-manager/local-env-variables.json:/opt/lambdas/ActionEnqueuerDefault.json'
+      - './src/functions/config/future-action-remover-manager/local-env-variables.json:/opt/lambdas/ActionRemoverDefault.json'
+      - './src/functions/config/pn-action-router-manager/local-env-variables.json:/opt/lambdas/ActionRouterDefault.json'
+      - './functions/action-enqueuer-manager:/opt/lambdas/action-enqueuer'
+      - './functions/pn-action-router-manager:/opt/lambdas/action-router'
+      - './functions/future-action-remover-manager:/opt/lambdas/action-remover'
+    networks:
+      - develop-network
+
+networks:
+  develop-network:
+    name: develop-network

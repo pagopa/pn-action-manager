@@ -1,0 +1,9 @@
+{
+  "Variables":  {
+    "LAST_WORKED_KEY": "3",
+    "LAMBDA_ENABLED_START": "2023-01-01T00:00:00Z",
+    "LAMBDA_ENABLED_END": "2099-01-01T00:00:00Z",
+    "LAST_POLL_TABLE": "LastPollForFutureAction",
+    "FUTURE_ACTION_TABLE": "FutureAction"
+  }
+}
