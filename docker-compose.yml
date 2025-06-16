@@ -1,23 +1,30 @@
+version: '3.9'
 services:
   # AWS LocalStack - servizi abilitati Lambda,S3,dynamodb con Node.js integrato
   localstack:
-    build: .  # Usa il Dockerfile per buildare l'immagine con Node.js
+    build:
+      context: .
+      dockerfile: dockerfile
+    privileged: true
+       # Usa il Dockerfile per buildare l'immagine con Node.js
     ports:
-      - '4566-4583:4566-4583'
+      - '4566:4566' # All servics will now go through the same port.
+      - '8080:8080' # Web UI for LocalStack
     environment:
       - SERVICES=lambda,s3,sqs,dynamodb,sns,secretsmanager,cloudwatch,ssm,ses,kinesis,events,logs
-      - EDGE_PORT=4566
-      - DATA_DIR=${TEMPDATADIR:-/tmp/localstack/data}
       - FORCE_LAMBDA_ZIP=${FORCE_LAMBDA_ZIP}
+      - LAMBDA_EXECUTOR=local
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LOCALSTACK_WEB=1
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - './functions:/opt/lambdas/functions'
-      - './functionsLib:/opt/lambdas/functionsLib'
-      - "./src/test/resources/testcontainers/credentials:/home/localstack/.aws/credentials"
-      - "./src/test/resources/testcontainers/initsh-for-lambdas.sh:/etc/localstack/init/ready.d/make-storages.sh"
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./functions:/opt/lambdas/functions
+      - ./functionsLib:/opt/lambdas/functionsLib
+      - ./src/test/resources/testcontainers/credentials:/home/localstack/.aws/credentials
+      - ./src/test/resources/testcontainers/initsh-for-lambdas.sh:/etc/localstack/init/ready.d/make-storages.sh
     networks:
       - develop-network
 
 networks:
   develop-network:
-    name: develop-network
+    name: pn-develop-network

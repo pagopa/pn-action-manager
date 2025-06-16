@@ -4,25 +4,31 @@
 
 - **Docker** e **Docker Compose** installati sul sistema
 
-## Permessi di esecuzione sullo script di zipping delle lambda
+## Permessi di esecuzione sullo script delle lambda per S.O windows
 ```bash
-chmod +x src/test/resources/script/zip.sh
+dos2unix ./src/test/resources/testcontainers/initsh-for-lambdas.sh
+chmod +x ./src/test/resources/testcontainers/initsh-for-lambdas.sh
 ```
+
+## Permessi di esecuzione per il socket di Docker
+```bash
+sudo chgrp docker /lib/systemd/system/docker.socket
+sudo chmod g+w /lib/systemd/system/docker.socket
 
 ## Comandi per l'ambiente
 
 ### 1. Preparazione delle Lambda
-Eseguire lo script per creare i file zip delle lambda:
+Eseguire lo script per creare i file delle lambda:
 
 ```bash
-./src/test/resources/script/zip.sh
+./src/test/resources/testcontainers/initsh-for-lambdas.sh
 ```
 
 ### 2. Build dell'immagine Docker
 Costruire l'immagine Docker dell'applicazione:
 
 ```bash
-docker compose build
+docker compose build o docker-compose build
 ```
 
 ### 3. Avvio dell'ambiente LocalStack
@@ -31,6 +37,7 @@ Avviare i container LocalStack e l'applicazione:
 ```bash
 docker compose up -d
 o anche docker compose up localstack
+o anche docker-compose up localstack
 ```
 
 ### 4. Verifica dello stato
