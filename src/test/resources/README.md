@@ -9,45 +9,21 @@
 dos2unix ./src/test/resources/testcontainers/initsh-for-lambdas.sh
 chmod +x ./src/test/resources/testcontainers/initsh-for-lambdas.sh
 ```
-
-## Permessi di esecuzione per il socket di Docker
-```bash
-sudo chgrp docker /lib/systemd/system/docker.socket
-sudo chmod g+w /lib/systemd/system/docker.socket
-
-## Comandi per l'ambiente
-
-### 1. Preparazione delle Lambda
-Eseguire lo script per creare i file delle lambda:
-
-```bash
-./src/test/resources/testcontainers/initsh-for-lambdas.sh
-```
-
-### 2. Build dell'immagine Docker
-Costruire l'immagine Docker dell'applicazione:
-
-```bash
-docker compose build o docker-compose build
-```
-
-### 3. Avvio dell'ambiente LocalStack
+### 2. Avvio dell'ambiente LocalStack
 Avviare i container LocalStack e l'applicazione:
 
 ```bash
-docker compose up -d
-o anche docker compose up localstack
-o anche docker-compose up localstack
+docker-compose up localstack
 ```
 
-### 4. Verifica dello stato
+### 3. Verifica dello stato
 Controllare che i container siano in esecuzione:
 
 ```bash
 docker compose ps
 ```
 
-### 5. Pulizia e ricostruzione
+### 4. Pulizia e ricostruzione
 Per fermare tutti i container e rifare il build da zero:
 
 ```bash
@@ -57,9 +33,6 @@ docker compose down
 # Rimuovere le immagini (opzionale, per forzare rebuild completo)
 docker compose down --rmi all
 
-# Ricostruire e riavviare
-docker compose build
-docker compose up -d
 ```
 
 ## Comandi utili per il debug
@@ -89,10 +62,6 @@ docker compose exec app bash
 ```bash
 # Fermare tutto e pulire volumi e network
 docker compose down -v --remove-orphans
-
-# Ricostruire completamente
-docker compose build --no-cache
-docker compose up -d
 ```
 
 ## Endpoint LocalStack

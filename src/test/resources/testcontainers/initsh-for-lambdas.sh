@@ -3,6 +3,8 @@
 # Mi posiziono nella cartella in cui sono presenti le lambda e la libreria actionCommon
 cd ../../lambdas
 
+apt-get update && apt-get install -y jq zip
+
 FORCE_LAMBDA_ZIP=${FORCE_LAMBDA_ZIP}
 
 echo "Valore env FORCE_LAMBDA_ZIP: $FORCE_LAMBDA_ZIP"
@@ -86,8 +88,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb put-item \
     --table-name LastPollForFutureAction \
-    --item '{"lastPoolKey": {"N": "3"}, "lastPollExecuted": {"S": "2025-06-11T16:02"}}' \
-
+    --item "{\"lastPoolKey\": {\"N\": \"3\"}, \"lastPollExecuted\": {\"S\": \"$(date -u -d '1 minute ago' '+%Y-%m-%dT%H:%M')\"}}"
 echo "Fine - Fase 4 : Creazione tabelle DynamoDB"
 
 echo "Inizio - Fase 5 : Creazione stream Kinesis"
