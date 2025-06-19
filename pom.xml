@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>it.pagopa.pn</groupId>
 		<artifactId>pn-parent</artifactId>
-		<version>2.1.2-SPRINGBOOT3-STARTER</version>
+		<version>2.1.2-SPRINGBOOT3-NATIVE</version>
 		<relativePath />
 	</parent>
 	<artifactId>pn-action-manager</artifactId>
@@ -130,7 +130,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>3.5.0</version>
+				<!--version>3.5.0</version-->
 				<!--configuration>
 					<image>
 						<builder>911845998067.dkr.ecr.eu-central-1.amazonaws.com/paketobuildpacks/builder-jammy-java-tiny:0.0.23</builder>
