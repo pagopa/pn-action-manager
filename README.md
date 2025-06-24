@@ -100,4 +100,4 @@ https://excalidraw.com/#json=7xYGxbjhSpZYUkPSshl5e,FZCEPwigDlHx_icozTQx1g
 1. JDK 21 installato in locale
 2. Docker avviato con container di Localstack (puoi utilizzare il Docker Compose presente nel repository).
 
-I dettagli sui test di integrazione e le procedure di testing sono disponibili in [README.md](./test/resources/testcontainers/README.md)
+I dettagli sui test di integrazione e le procedure di testing sono disponibili in [README.md](./test/resources/README.md)
