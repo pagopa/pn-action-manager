@@ -5,15 +5,15 @@ Repository per la gestione delle action
 Si compone di:
 
 - AWS **Lambda**:
-    - **action-enqueuer-manager**: riceve eventi da uno stream Kinesis alimentato dagli eventi di rimozione di record dalla tabella `pn-FutureAction` , per ciascuno, determina la coda SQS di destinazione in base al tipo di action. Raggruppa le action per destinazione e le invia in batch alla relativa coda SQS. Scarta le action fuori timeSlot o con il campo logicalDeleted a true. Restituisce in risposta un array contenente gli identificativi dei record non lavorati correttamente dove è stata riscontrata un'eccezione.
+    - **pn-action-router-manager**: gestisce eventi provenienti da uno stream Kinesis alimentato dagli eventi di inserimento di record dalla tabella `pn-Action`, processando ciascun record per decidere se inviarlo immediatamente a una coda SQS oppure inserire il record nella tabella `pn-FutureAction`. Restituisce in risposta un array contenente gli identificativi dei record dove in caso è stata riscontrata un'eccezione.
+    - **action-enqueuer-manager**: riceve eventi da uno stream Kinesis alimentato dagli eventi di rimozione di record dalla tabella `pn-FutureAction` , per ciascuno, determina la coda SQS di destinazione in base al tipo di action. Raggruppa le action per destinazione e le invia in batch alla relativa coda SQS. Scarta le action con il campo logicalDeleted a true. Restituisce in risposta un array contenente gli identificativi dei record in caso è stata riscontrata un'eccezione.
     - **future-action-remover-manager**: eseguita ogni minuto tramite regola EventBridge, elimina in batch dalla tabella `pn-FutureAction` tutte le action nei timeslot scaduti. Aggiorna il riferimento al timeslot lavorato nella tabella `pn-LastPollForFutureAction` solo se tutte le eliminazioni vanno a buon fine.
-    - **pn-action-router-manager**: gestisce eventi provenienti da uno stream Kinesis alimentato dagli eventi di inserimento di record dalla tabella `pn-Action`, processando ciascun record per decidere se inviarlo immediatamente a una coda SQS oppure inserire il record nella tabella `pn-FutureAction`. Restituisce in risposta un array contenente gli identificativi dei record non lavorati correttamente dove è stata riscontrata un'eccezione.
 - Microservice Spring Boot 3
   - **pn-action-manager**: espone due API per la gestione delle action. La prima API consente l'inserimento di un nuovo record nella tabella Action, mentre la seconda API, operando sulla tabella futureAction, permette di annullare l'azione programmata associata a uno specifico slot temporale.
 
 ### Architettura
 ![Architettura.png](Architettura.png)
-https://excalidraw.com/#json=7xYGxbjhSpZYUkPSshl5e,FZCEPwigDlHx_icozTQx1g
+https://excalidraw.com/#json=64HdbyzbKFlgq_RFe6jC9,9fCK45IQfvKxcMsE3hPeVA
 ## Componenti
 
 ### pn-action-manager
@@ -33,10 +33,9 @@ https://excalidraw.com/#json=7xYGxbjhSpZYUkPSshl5e,FZCEPwigDlHx_icozTQx1g
 
 ## action-enqueuer-manager
 ### Responsabilità
-- Inserimento 
 - Raggruppamento delle action per destinazione SQS in base al tipo di action
 - Invio in batch delle action alle relative code SQS (endpoint determinato dinamicamente)
-- Scarto delle action fuori dal timeSlot di lavoro o con il campo `logicalDeleted` a `true`
+- Scarto delle action con il campo `logicalDeleted` a `true`
 - Restituisce in risposta un array contenente gli identificativi dei record non lavorati correttamente dove è stata riscontrata un'eccezione.
 
 ### Configurazione
@@ -54,7 +53,7 @@ https://excalidraw.com/#json=7xYGxbjhSpZYUkPSshl5e,FZCEPwigDlHx_icozTQx1g
 
 ## future-action-remover-manager
 ### Responsabilità
-- Esecuzione periodica (ogni minuto, configurabile) tramite Lambda
+- Esecuzione periodica (previsto ogni minuto) tramite Lambda
 - Lettura delle action dalla tabella DynamoDB `pn-FutureAction` con timeslot scaduto rispetto alla finestra di lavoro
 - Eliminazione in batch delle action scadute dalla tabella `pn-FutureAction`
 - Aggiornamento della tabella `pn-LastPollForFutureActionTable` con il riferimento all’ultimo timeslot lavorato, solo se tutte le eliminazioni sono andate a buon fine
