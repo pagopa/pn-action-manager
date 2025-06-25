@@ -78,25 +78,15 @@ docker compose exec app bash
 # Ferma tutto e pulisci volumi e network
 docker compose down -v --remove-orphans
 ```
-
-## Endpoint LocalStack
-
-Dopo l'avvio, LocalStack sarà disponibile su:
-- **API Gateway**: `http://localhost:4566`
-- **Lambda**: `http://localhost:4566`
-- **S3**: `http://localhost:4566`
-
 ## LocalStack Web
-
 Per accedere all'interfaccia web di LocalStack e visualizzare tute le risorse: [LocalStack Web](https://app.localstack.cloud/inst/default/resources)
 ## Configurazione
 
 ### File JSON di configurazione
 
-Nella cartella `config` è presente un file JSON per la gestione delle variabili d'ambiente delle Lambda. Questo file:
-- Passa le variabili d'ambiente alle funzioni Lambda su LocalStack
+Nella cartella `config` di ogni lambda è presente un file JSON `local-env-variables.json`  per la gestione delle variabili d'ambiente delle Lambda. Questo file viene utilizzato per:
+- Passare le variabili d'ambiente alle funzioni Lambda su LocalStack
 - Viene convertito tramite il comando `jq` negli script di deployment
-- Centralizza la configurazione dell'ambiente di sviluppo
 
 Il file viene processato automaticamente durante il setup delle Lambda per garantire che abbiano accesso alle configurazioni necessarie.
 
