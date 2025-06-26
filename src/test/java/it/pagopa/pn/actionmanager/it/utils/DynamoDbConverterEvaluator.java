@@ -112,6 +112,7 @@ public class DynamoDbConverterEvaluator {
             }
             case NUL -> assertEquals(Boolean.TRUE, actualValue,
                     String.format("L'attributo '%s' dovrebbe essere null", key));
+            default -> throw new IllegalArgumentException(String.format("Tipo '%s' non gestito per la verifica del valore atteso", expectedType.name()));
         }
     }
 

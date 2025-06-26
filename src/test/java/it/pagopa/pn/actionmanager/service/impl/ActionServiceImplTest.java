@@ -30,7 +30,7 @@ class ActionServiceImplTest {
     private ActionServiceImpl actionService;
 
     @BeforeEach
-    public void setup() {
+     void setup() {
         actionDao = Mockito.mock(ActionDao.class);
         futureActionDao = Mockito.mock(FutureActionDao.class);
         PnActionManagerConfigs pnActionManagerConfigs = new PnActionManagerConfigs();
@@ -91,9 +91,8 @@ class ActionServiceImplTest {
 
         PnBadRequestException ex = Assertions.assertThrows(
                 PnBadRequestException.class,
-                () -> actionService.addOnlyActionIfAbsent(action).block()
+                () -> actionService.addOnlyActionIfAbsent(action)
         );
-
         Assertions.assertEquals("actionId cannot be blank", ex.getMessage());
         Assertions.assertTrue(ex.getMessage().contains("actionId cannot be blank"));
     }
@@ -112,7 +111,7 @@ class ActionServiceImplTest {
 
         PnBadRequestException ex = Assertions.assertThrows(
                 PnBadRequestException.class,
-                () -> actionService.addOnlyActionIfAbsent(action).block()
+                () -> actionService.addOnlyActionIfAbsent(action)
         );
         Assertions.assertEquals("iun cannot be blank", ex.getMessage());
         Assertions.assertTrue(ex.getMessage().contains("iun cannot be blank"));
