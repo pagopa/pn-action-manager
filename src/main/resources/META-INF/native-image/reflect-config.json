@@ -5,7 +5,7 @@
     "allDeclaredFields": true,
     "allDeclaredMethods": true
   },
-    {
+  {
     "name": "io.netty.util.internal.shaded.org.jctools.queues.unpadded.MpscUnpaddedArrayQueueProducerIndexField",
     "allDeclaredFields": true,
     "allDeclaredConstructors": true,
