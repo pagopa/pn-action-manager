@@ -30,7 +30,7 @@
     "WireTapLogActivation": "false",
     "MountEfs": "false",
     "AutoscalingThreshold": "21000",
-    "MinTasksNumber": 3,
-    "MaxTasksNumber": 8
+    "MinTasksNumber": "3",
+    "MaxTasksNumber": "8"
   }
 }
