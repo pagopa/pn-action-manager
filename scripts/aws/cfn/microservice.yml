@@ -228,7 +228,20 @@ Parameters:
     Type: String
     Default: nodejs20.x
     Description: Runtime for Lambdas.
+  #AUTOSCALING PARAMETERS
+  AutoscalingThreshold:
+    Default: "21000"
+    Type: String
 
+  MinTasksNumber:
+    Default: 1
+    Type: Number
+    Description: minimum autoscaling number of tasks
+
+  MaxTasksNumber:
+    Default: 8
+    Type: Number
+    Description: maximum autoscaling number of tasks
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -252,6 +265,9 @@ Resources:
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref SubnetsIds ]
         AutoscalingStrategy: REST-API
+        AutoscalingThreshold: ${AutoscalingThreshold}
+        MinTasksNumber: ${MinTasksNumber}
+        MaxTasksNumber: ${MaxTasksNumber}
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn

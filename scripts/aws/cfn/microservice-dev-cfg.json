@@ -28,6 +28,9 @@
     "ActionLambdasEnabledEnd": "2099-12-31T23:59:59Z",
     "PnCronAnalyzer": "* */1 * * * *",
     "WireTapLogActivation": "false",
-    "MountEfs": "false"
+    "MountEfs": "false",
+    "AutoscalingThreshold": "21000",
+    "MinTasksNumber": 3,
+    "MaxTasksNumber": 8
   }
 }
