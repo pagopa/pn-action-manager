@@ -1,5 +1,14 @@
 [
   {
+    "name": "com.amazonaws.xray.entities.SegmentImpl",
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.amazonaws.xray.AWSXRay",
+    "allPublicMethods": true
+  },
+  {
     "name": "net.logstash.logback.encoder.LogstashEncoder",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
