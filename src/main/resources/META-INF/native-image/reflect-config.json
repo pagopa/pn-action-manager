@@ -6,7 +6,7 @@
   },
   {
     "name": "com.amazonaws.xray.AWSXRay",
-    "allPublicMethods": true∏
+    "allPublicMethods": true
   },
   {
     "name": "it.pagopa.pn.actionmanager.dto.action.Action",
