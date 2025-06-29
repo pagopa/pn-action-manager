@@ -14,7 +14,14 @@ All'avvio del container LocalStack tramite Docker Compose puoi testare le Lambda
   - Per installare Docker, segui le istruzioni su [Docker Docs](https://docs.docker.com/get-docker/).
   - Per installare Docker Compose, segui le istruzioni su [Docker Compose Docs](https://docs.docker.com/compose/install/).
 
-## Permessi di esecuzione sullo script delle Lambda (Windows)
+## STEP per il test in locale
+
+- Setup dei permessi di esecuzione sullo script delle lambda (vd. paragrafo relativo)
+- avvio dell'ambiente localstack  (vd. paragrafo relativo)
+- avvio dell'applicativo java 
+- inserimento/unschedule delle azioni via http (di default **action-manager** risponde sulla porta **8081**)
+
+[ref01]: ## Permessi di esecuzione sullo script delle Lambda (Windows)
 
 ```bash
 # Converti lo script in formato Unix e rendilo eseguibile
@@ -22,7 +29,7 @@ dos2unix ./src/test/resources/testcontainers/initsh-for-lambdas.sh
 chmod +x ./src/test/resources/testcontainers/initsh-for-lambdas.sh
 ```
 
-### 2. Avvio dell'ambiente LocalStack
+### Avvio dell'ambiente LocalStack
 Avvia i container LocalStack e l'applicazione:
 
 ```bash
@@ -30,7 +37,7 @@ Avvia i container LocalStack e l'applicazione:
  docker compose up localstack
 ```
 
-### 3. Verifica dello stato
+### Verifica dello stato
 Controlla che i container siano in esecuzione:
 
 ```bash
@@ -38,7 +45,7 @@ Controlla che i container siano in esecuzione:
 docker compose ps
 ```
 
-### 4. Pulizia e ricostruzione
+### Pulizia e ricostruzione
 Per fermare tutti i container e ricostruire da zero:
 
 ```bash 

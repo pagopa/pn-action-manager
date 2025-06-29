@@ -1,7 +1,6 @@
-version: '3.9'
 services:
   localstack:
-    image: localstack/localstack:4.0.3
+    image: localstack/localstack:4.5
     ports:
       - '4566:4566' # Tutti i servizi ora passano da questa porta
       - '8080:8080' # Web UI per LocalStack
