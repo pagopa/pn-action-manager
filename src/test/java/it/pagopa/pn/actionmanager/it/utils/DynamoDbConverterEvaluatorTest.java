@@ -89,8 +89,9 @@ class DynamoDbConverterEvaluatorTest {
 
     @Test
     void testVerifyConversion_L_KO() {
+        List<String> list = List.of();
         AssertionError error = assertThrows(AssertionError.class, () ->
-            DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "active", Type.L, List.of())
+            DynamoDbConverterEvaluator.verifyConversion(ITEM_MAP, "active", Type.L, list)
         );
         assertTrue(error.getMessage().contains("L'attributo 'active' non è del tipo atteso"));
     }
