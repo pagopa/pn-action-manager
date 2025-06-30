@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>it.pagopa.pn</groupId>
 			<artifactId>pn-commons</artifactId>
-			<version>2.12.1-SPRINGBOOT3-NATIVE</version>
+			<version>2.12.1-SPRINGBOOT3-NATIVE-2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>it.pagopa.tech.lollipop-consumer-java-sdk</groupId>
