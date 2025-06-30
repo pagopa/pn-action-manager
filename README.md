@@ -50,6 +50,7 @@ https://excalidraw.com/#json=64HdbyzbKFlgq_RFe6jC9,9fCK45IQfvKxcMsE3hPeVA
 | `ActionLambdasEnabledStart` | Data/ora di inizio finestra di lavoro                                       | -            | 2024-05-10T12:00 |
 | `ActionLambdasEnabledEnd `  | Data/ora di fine finestra di lavoro                                         | -            | 2099-05-30T12:00 |
 
+N.B. Le action vengono considerate valide solo se il campo `createdAt` rientra nell’intervallo temporale compreso tra `ActionLambdasEnabledStart` ed `ActionLambdasEnabledEnd`.
 
 ## future-action-remover-manager
 ### Responsabilità
@@ -70,6 +71,8 @@ https://excalidraw.com/#json=64HdbyzbKFlgq_RFe6jC9,9fCK45IQfvKxcMsE3hPeVA
 | `ActionLambdasEnabledStart`    | Data/ora di inizio finestra di lavoro                              | -            | 2030-04-30T12:00                |
 | `ActionLambdasEnabledEnd`      | Data/ora di fine finestra di lavoro                                | -            | 2099-04-30T12:00                |
 | `SLEEP_FOR_UNPROCESSED`        | Millisecondi di attesa per retry su elementi non processati        | -            | 1000                            |
+
+N.B. Le action vengono considerate valide solo se il campo `createdAt` rientra nell’intervallo temporale compreso tra `ActionLambdasEnabledStart` ed `ActionLambdasEnabledEnd`.
 
 ## pn-action-router-manager
 ### Responsabilità
@@ -93,6 +96,7 @@ https://excalidraw.com/#json=64HdbyzbKFlgq_RFe6jC9,9fCK45IQfvKxcMsE3hPeVA
 | `ActionLambdasEnabledStart`    | Data/ora di inizio finestra di lavoro                                       | -            | 2024-05-10T12:00              |
 | `ActionLambdasEnabledEnd`      | Data/ora di fine finestra di lavoro                                         | -            | 2099-05-30T12:00              |
 
+N.B. Le action vengono considerate valide solo se il campo `createdAt` rientra nell’intervallo temporale compreso tra `ActionLambdasEnabledStart` ed `ActionLambdasEnabledEnd`.
 ## Testing in locale
 
 ### Prerequisiti
