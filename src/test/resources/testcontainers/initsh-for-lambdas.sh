@@ -135,7 +135,7 @@ aws dynamodb describe-kinesis-streaming-destination \
 echo "Fine - Fase 6 : Creazione legame stream Kinesis con stream DynamoDB"
 
 echo "Inizio - Fase 7 : Creazione code SQS"
-queues="pn-delivery_push_actions pn-delivery_push_validation_actions pn-action_manager_action-timeout-error-DLQ"
+queues="pn-delivery_push_actions pn-delivery_push_validation_actions"
 
 for qn in  $( echo $queues | tr " " "\n" ) ; do
     echo creating queue $qn ...
