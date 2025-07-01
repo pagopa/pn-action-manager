@@ -24,6 +24,7 @@
     "CdcPnActionArn": "arn:aws:kinesis:eu-south-1:830192246553:stream/pn-action-cdc",
     "CpuValue": "1024",
     "MemoryAmount": "2GB",
+    "AutoscalingThreshold": "21000",
     "ActionLambdasEnabledStart": "2025-06-11T14:30:00Z",
     "ActionLambdasEnabledEnd": "2099-12-31T23:59:59Z",
     "PnCronAnalyzer": "* */1 * * * *",

@@ -229,6 +229,14 @@ Parameters:
     Default: nodejs20.x
     Description: Runtime for Lambdas.
 
+  AutoscalingThreshold:
+    Default: 70
+    Type: String
+
+  AutoscalingCheckPeriod:
+    Default: 60
+    Type: Number
+
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -252,6 +260,8 @@ Resources:
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref SubnetsIds ]
         AutoscalingStrategy: REST-API
+        AutoscalingThreshold: !Ref AutoscalingThreshold
+        AutoscalingCheckPeriod: !Ref AutoscalingCheckPeriod
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
