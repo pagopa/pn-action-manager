@@ -25,8 +25,6 @@
       "DOCUMENT_CREATION_RESPONSE_SENDER_ACK":"ActionValidationQueue",
       "SEND_ANALOG_FINAL_STATUS_RESPONSE":"ActionQueue"
     },
-    "TIMEOUT_DLQ": "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/pn-action_manager_action-timeout-error-DLQ",
-    "LAMBDA_ENABLED_START": "2023-01-01T00:00:00Z",
-    "LAMBDA_ENABLED_END": "2099-01-01T00:00:00Z"
+    "TIMEOUT_DLQ": "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/pn-action_manager_action-timeout-error-DLQ"
   }
 }

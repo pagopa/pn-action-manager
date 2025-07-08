@@ -5,8 +5,8 @@
   "LAST_WORKED_KEY": "1",
   "TOLLERANCE_IN_MILLIS": 3000,
   "featureFlag": {
-    "start": "2030-04-30T12:00",
-    "end": "2099-04-30T12:00"
+    "start": "1903780800",
+    "end": "4081233600"
   },
   "SLEEP_FOR_UNPROCESSED": 1000
 }
