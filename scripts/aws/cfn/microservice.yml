@@ -307,7 +307,7 @@ Resources:
         - ReportBatchItemFailures
       FilterCriteria:
         Filters:
-          - Pattern: !Sub '{"data": {"eventName": ["REMOVE"], "dynamodb": {"ApproximateCreationDateTime": [{ "numeric": [ ">=", ${ActionLambdasEnabledStart}, "<", ${ActionLambdasEnabledEnd} ] }]}}}'
+          - Pattern: '{"data": {"eventName": ["REMOVE"], "dynamodb": {"ApproximateCreationDateTime": [{ "numeric": [ ">=", 1752063600, "<", 4087285200 ] }]}}}'
       MaximumBatchingWindowInSeconds: 300
       MaximumRetryAttempts: 5
       StartingPosition: TRIM_HORIZON
@@ -545,7 +545,7 @@ Resources:
         - ReportBatchItemFailures
       FilterCriteria:
         Filters:
-          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "dynamodb": {"ApproximateCreationDateTime": [{ "numeric": [ ">=", ${ActionLambdasEnabledStart}, "<", ${ActionLambdasEnabledEnd} ] }]}}}'
+          - Pattern: '{"data": {"eventName": ["INSERT"], "dynamodb": {"ApproximateCreationDateTime": [{ "numeric": [ ">=", 1752063600, "<", 4087285200 ] }]}}}'
       MaximumBatchingWindowInSeconds: 300
       MaximumRetryAttempts: 5
       StartingPosition: TRIM_HORIZON
