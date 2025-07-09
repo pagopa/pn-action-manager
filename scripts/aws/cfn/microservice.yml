@@ -187,11 +187,11 @@ Parameters:
 
   ActionLambdasEnabledStart:
     Type: String
-    Description: 'Enable action lambdas start'
+    Description: 'Start date in EPOCH millis format (important!) for action lambdas enabled'
 
   ActionLambdasEnabledEnd:
     Type: String
-    Description: 'Enable action lambdas end'
+    Description: 'End date in EPOCH millis format (important!) for action lambdas enabled'
 
     # Logging parameters
   WireTapLogActivation:

@@ -25,8 +25,8 @@
     "CpuValue": "1024",
     "MemoryAmount": "2GB",
     "AutoscalingThreshold": "21000",
-    "ActionLambdasEnabledStart": "1752068400",
-    "ActionLambdasEnabledEnd": "4087285200",
+    "ActionLambdasEnabledStart": "1752075900000",
+    "ActionLambdasEnabledEnd": "4087285200000",
     "PnCronAnalyzer": "* */1 * * * *",
     "WireTapLogActivation": "false",
     "MountEfs": "false"
