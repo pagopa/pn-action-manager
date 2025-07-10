@@ -25,6 +25,8 @@
     "CpuValue": "1024",
     "MemoryAmount": "2GB",
     "AutoscalingThreshold": "21000",
+    "MinTasksNumber": "2",
+    "MaxTasksNumber": "4",
     "ActionLambdasEnabledStart": "1752075900000",
     "ActionLambdasEnabledEnd": "4087285200000",
     "PnCronAnalyzer": "* */1 * * * *",
