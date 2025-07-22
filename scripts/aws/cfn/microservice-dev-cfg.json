@@ -27,7 +27,7 @@
     "AutoscalingThreshold": "21000",
     "MinTasksNumber": "2",
     "MaxTasksNumber": "4",
-    "ActionLambdasEnabledStart": "4070965225000",
+    "ActionLambdasEnabledStart": "1753173328000",
     "ActionLambdasEnabledEnd": "4087285200000",
     "PnCronAnalyzer": "* */1 * * * *",
     "WireTapLogActivation": "false",
