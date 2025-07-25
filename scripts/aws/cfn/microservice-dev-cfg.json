@@ -29,7 +29,7 @@
     "MaxTasksNumber": "4",
     "ActionLambdasEnabledStart": "1753173328000",
     "ActionLambdasEnabledEnd": "4087285200000",
-    "PnCronAnalyzer": "* */1 * * * *",
+    "PnCronAnalyzer": "-",
     "WireTapLogActivation": "false",
     "MountEfs": "false"
   }
