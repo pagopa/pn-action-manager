@@ -8,7 +8,7 @@
 		<relativePath />
 	</parent>
 	<artifactId>pn-action-manager</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>pn-action-manager</name>
 	<description>A microservice to handle actions</description>
 	<scm>
@@ -19,7 +19,7 @@
   </scm>
 	<properties>
 		<java.version>21</java.version>
-		<awspring.version>3.3.0</awspring.version>
+		<awspring.version>3.4.0</awspring.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -57,17 +57,17 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.15.3</version>
+			<version>1.21.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
-			<version>3.1.0</version>
+			<version>3.2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -85,7 +85,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.6.15</version>
+			<version>1.6.16</version>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
@@ -106,7 +106,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.34</version>
+			<version>1.18.38</version>
 			<scope>provided</scope>
 		</dependency>
 

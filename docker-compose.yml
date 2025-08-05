@@ -1,0 +1,21 @@
+services:
+  localstack:
+    image: localstack/localstack:4.5
+    ports:
+      - '4566:4566' # Tutti i servizi ora passano da questa porta
+      - '8080:8080' # Web UI per LocalStack
+    environment:
+      - SERVICES=lambda,s3,sqs,dynamodb,sns,secretsmanager,cloudwatch,ssm,ses,kinesis,events,logs
+      - FORCE_LAMBDA_ZIP=${FORCE_LAMBDA_ZIP}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./functions:/opt/lambdas/functions
+      - ./functionsLib:/opt/lambdas/functionsLib
+      - ./src/test/resources/testcontainers/credentials:/root/.aws/credentials
+      - ./src/test/resources/testcontainers/initsh-for-lambdas.sh:/etc/localstack/init/ready.d/make-storages.sh
+    networks:
+      - develop-network
+
+networks:
+  develop-network:
+    name: pn-develop-network

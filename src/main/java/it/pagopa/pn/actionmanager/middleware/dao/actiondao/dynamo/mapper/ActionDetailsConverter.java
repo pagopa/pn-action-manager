@@ -67,16 +67,16 @@ public class ActionDetailsConverter implements AttributeConverter<Map<String, Ob
             case Boolean b -> {
                 return AttributeValue.builder().bool(b).build();
             }
-            case List list -> {
+            case List<?> list -> {
                 List<AttributeValue> listItems = new ArrayList<>();
                 for (Object item : list) {
                     listItems.add(convertToAttributeValue(item));
                 }
                 return AttributeValue.builder().l(listItems).build();
             }
-            case Map map -> {
+            case Map<?,?> map -> {
                 return AttributeValue.builder()
-                        .m(mapToAttributeValueMap((Map<String, Object>) value))
+                        .m(mapToAttributeValueMap((Map<String, Object>) map))
                         .build();
             }
             default -> {

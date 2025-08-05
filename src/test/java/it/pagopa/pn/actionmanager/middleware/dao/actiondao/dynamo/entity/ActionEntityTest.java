@@ -13,7 +13,7 @@ class ActionEntityTest {
     private ActionEntity entity;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         entity = new ActionEntity();
     }
 
