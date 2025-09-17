@@ -8,7 +8,7 @@
 		<relativePath />
 	</parent>
 	<artifactId>pn-action-manager</artifactId>
-	<version>1.1.0-RC.1</version>
+	<version>1.1.0</version>
 	<name>pn-action-manager</name>
 	<description>A microservice to handle actions</description>
 	<scm>
