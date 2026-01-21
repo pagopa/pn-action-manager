@@ -37,7 +37,7 @@
     "@aws-sdk/node-http-handler": "^3.374.0",
     "@aws-sdk/util-dynamodb": "^3.538.0",
     "axios": "^1.6.8",
-    "config": "^3.3.11",
+    "config": "^4.2.0",
     "pn-action-common": "file:../../functionsLib/actionCommon",
     "uuid": "^9.0.1"
   }
