@@ -34,7 +34,7 @@
     "@aws-sdk/lib-dynamodb": "^3.535.0",
     "aws-xray-sdk": "^3.5.4",
     "aws-xray-sdk-core": "^3.5.4",
-    "config": "^3.3.11",
+    "config": "^4.2.0",
     "lambda-tester": "^4.0.1",
     "luxon": "^3.4.4",
     "proxyquire": "^2.1.3"
