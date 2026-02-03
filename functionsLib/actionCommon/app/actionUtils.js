@@ -20,7 +20,7 @@ async function getQueueUrl(actionType, details, envVarMapQueueName, envVarMapUrl
     return queueUrl;
 }
 
-function getCompleteActionType(actionType, details) {
+async function getCompleteActionType(actionType, details) {
     if(!details){
         return actionType;
     }
@@ -83,5 +83,6 @@ async function getQueueFromParameterStore(completeActionType, parameterStoreName
 module.exports = {
     getQueueNameFromParameterStore,
     getQueueName,
-    getQueueUrl
+    getQueueUrl,
+    getCompleteActionType
 }
