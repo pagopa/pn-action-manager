@@ -10,6 +10,7 @@ const queue1 = 'coda1';
 const queue2 = 'coda2';
 
 let sendedActionToQueue = [];
+let sendedActionToEventBridge = [];
 let sendedActionToDynamo = [];
 let isRecordToSend = true;
 
@@ -25,29 +26,23 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
       }
     },
 
-    "./sqs/writeToSqs.js": {
-        writeMessagesToQueue: async (actionsToSend, context, destinationQueueUrl) =>{
-            let notSendedImmediateActions = [];
+    "./eventBridge/writeToEventBridge.js": {
+      writeMessagesToEventBridge: async (actionsToSend, context) => {
+        let notSendedImmediateActions = [];
 
-            //Vengono aggiunte le azioni inviate all'array delle azioni inviate in coda
-            for (var i = 0; i < actionsToSend.length; i++) {
-
-              let action = actionsToSend[i];
-              if(! action.actionToFail){
-                console.log('[TEST] action is not to fail ', action)
-
-                let copiedAction = Object.assign({}, action);
-                copiedAction.destinationQueueUrl = destinationQueueUrl;
-                sendedActionToQueue.push(copiedAction);  
-              }else{
-                //viene simulato il fallimento nell'invio di un action alla coda
-                console.log('[TEST] action to fail ', action)
-                notSendedImmediateActions = actionsToSend
-              }
-            }
-            
-            return notSendedImmediateActions;
+        for (var i = 0; i < actionsToSend.length; i++) {
+          let action = actionsToSend[i];
+          if (!action.actionToFail) {
+            sendedActionToEventBridge.push(Object.assign({}, action));
+          } else {
+            // Simula fallimento su EventBridge: viene ritornato tutto il batch
+            notSendedImmediateActions = actionsToSend;
+            break;
+          }
         }
+
+        return notSendedImmediateActions;
+      },
     },
     "./dynamo/writeToDynamo.js": {
         writeMessagesToDynamo: async (futureActions, context) =>{
@@ -60,7 +55,7 @@ const eventHandler = proxyquire.noCallThru().load("../app/eventHandler.js", {
                 sendedActionToDynamo.push(futureAction);  
               }else{
                 //viene simulato il fallimento nell'invio di un action alla coda
-                notSendedFutureActions = actionsToSend
+                notSendedFutureActions = futureActions
               }
             }
 
@@ -135,7 +130,7 @@ describe("eventHandlerTest", function () {
     let queueNameMapToQueueUrlMap;
   
     //Viene verificato che le azioni siano state inserite in maniera corretta in futureAction piuttosto che in coda (e nella coda giusta)
-    checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue, actionToQueueNameMap, queueNameMapToQueueUrlMap);
+    checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToEventBridge);
 
   });
 
@@ -169,7 +164,7 @@ describe("eventHandlerTest", function () {
     });
 
     //Viene verificato che le azioni siano state inserite in maniera corretta in futureAction piuttosto che in coda (e nella coda giusta)
-    checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue);
+    checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToEventBridge);
   });
 
   it("no-record-to-send", async () => {
@@ -203,7 +198,7 @@ describe("eventHandlerTest", function () {
     });
 
     //Viene che nessuna azione sia stata inviata in coda
-    expect(sendedActionToQueue.length).deep.equals(0);
+    expect(sendedActionToEventBridge.length).deep.equals(0);
     //Viene che nessuna azione sia stata inviata in dynamo
     expect(sendedActionToDynamo.length).deep.equals(0);
 
@@ -258,11 +253,11 @@ describe("eventHandlerTest", function () {
     expect(foundImmAction2Data.length).deep.equals(1);
 
     //Viene verificato che sia stata inviata la sola azione attesa futureAction1Data
-    checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue);
+    checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToEventBridge);
   });
 });
 
-function checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToQueue, actionToQueueNameMap, queueNameMapToQueueUrlMap){
+function checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionToDynamo, sendedActionToEventBridge){
   for (var i = 0; i < arrayInsertedData.length; i++) {
     let actionData = arrayInsertedData[i];
     let actionDataInfo = actionData.dynamodb.NewImage;
@@ -273,24 +268,22 @@ function checkAllEventSentToCorrectDestination(arrayInsertedData, sendedActionTo
       );
       expect(findInSendToDynamo.length).deep.equals(1);
     }else{
-      //Viene verificato che l'azione futura sia stata effettivamente inviata verso la specifica coda di destinazione
-      const findInSendToQueue = sendedActionToQueue.filter( actionSendToQueue => 
-        actionSendToQueue.actionId == actionDataInfo.actionId.S 
-        &&
-        actionSendToQueue.destinationQueueUrl == actionDataInfo.expectedDestinationQueueUrl.S
+      //Viene verificato che l'azione immediata sia stata effettivamente inviata verso EventBridge
+      const findInSendToEventBridge = sendedActionToEventBridge.filter( actionSent =>
+        actionSent.actionId == actionDataInfo.actionId.S
       );
-      expect(findInSendToQueue.length).deep.equals(1);
+      expect(findInSendToEventBridge.length).deep.equals(1);
     }
   }
 }
 
 contextMock = {
     awsRequestId: '60ed6b20-85df-4ee3-af82-d835f281b915',
-    getRemainingTimeInMillis: getRemainingTimeInMillis()
+  getRemainingTimeInMillis: () => getRemainingTimeInMillis()
 }
 
 function getBase64Record(data){
-  return btoa(JSON.stringify(data, null, 2))
+  return Buffer.from(JSON.stringify(data, null, 2)).toString("base64")
 }
 function getRemainingTimeInMillis(){
     return 1000000;
@@ -342,7 +335,7 @@ function getData(actionId, notBefore, actionType, isFutureAction, isActionToFail
             "S": 'details' 
          },
          "actionToFail":{ //ONLY FOR TEST SCOPE
-          "S": isActionToFail 
+           "BOOL": isActionToFail 
          },
          "expectedDestinationQueueUrl":{ //ONLY FOR TEST SCOPE
           "S": expectedDestinationQueueUrl 
@@ -386,6 +379,7 @@ function getImmediateActionDate(){
 
 function initializeMockData(){
   sendedActionToQueue = [];
+  sendedActionToEventBridge = [];
   sendedActionToDynamo = [];
   isRecordToSend = true;
 }
