@@ -39,8 +39,17 @@ async function writeMessagesToEventBridge(immediateActions, context) {
       const response = await eventBridgeclient.send(command);
       console.log("Sent message response: %j", response);
 
-      if (response.Failed && response.Failed.length > 0) {
-        return checkAndReturnFailedAction(splicedActionsArray, response);
+      const failedEntryCount = response?.FailedEntryCount ?? response?.FailedEntityCount ?? 0;
+
+      if (failedEntryCount > 0) {
+        const failedActions = splicedActionsArray.filter((_, index) => {
+          const entry = response.Entries[index];
+          return entry && entry.ErrorCode != null;
+        });
+        console.warn(
+          "EventBridge PutEvents returned failed entries; rescheduling spliced batch"
+        );
+        return [...failedActions];
       }
     }
     catch (exceptions) {
@@ -62,27 +71,10 @@ async function writeMessagesToEventBridge(immediateActions, context) {
     }
   }
 
-  console.log("Ending writeMessagesToQueue with arrayActionNotSended length", immediateActions.length);
+  console.log("Ending writeMessagesToEventBridge with arrayActionNotSended length", immediateActions.length);
   return immediateActions;
 
 };
-
-function checkAndReturnFailedAction(splicedActionsArray, response){
-  console.log('There is an error in sending message ', response.Failed)
-  let failedActionArray = [];
-
-  console.log('Start find error in actionToSend ',JSON.stringify(splicedActionsArray) )
-
-  splicedActionsArray.forEach((element) => {
-    if (
-      response.Failed.filter((currFailed) => currFailed.Id == element.Id)
-        .length !== 0
-    )
-    failedActionArray.push(element); //Se fallisce nella put
-  });
-
-  return failedActionArray; //viene restituito l'array delle action Fallite
-}
 
 function checkMandatoryInformation(actionsToSendMapped){
 
@@ -96,7 +88,6 @@ function getMappedMessageToSend(splicedActionsArray){
   let actionsToSendMapped = [];
   splicedActionsArray.forEach(function (action) {
     let messageToSend = mapActionToEventBridgeMessage(action);
-    action.Id = messageToSend.Id;
     actionsToSendMapped.push(messageToSend);
   });
   return actionsToSendMapped;
@@ -116,12 +107,6 @@ function mapActionToEventBridgeMessage(action) {
 
     const message = {
       Source: "deliveryPush",
-      Resources: {
-        createdAt: new Date().toISOString(),
-        eventId: uuid,
-        eventType: "ACTION_GENERIC",
-        iun: action.iun
-      },
       DetailType: ActionUtils.getCompleteActionType(action?.type, action?.details),
       Detail: JSON.stringify(copiedAction)
     };

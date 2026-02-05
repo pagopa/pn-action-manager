@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { describe, it, beforeEach } = require("mocha");
 const proxyquire = require("proxyquire").noPreserveCache();
 
 describe("writeToEventBridge.writeMessagesToEventBridge", function () {
@@ -163,7 +164,13 @@ describe("writeToEventBridge.writeMessagesToEventBridge", function () {
 
 	it("when response contains Failed entries, returns the spliced batch (current implementation)", async () => {
 		configValues.MAX_EVENT_BRIDGE_BATCH = 5;
-		eventBridgeSendImpl = async () => ({ Failed: [{ Id: undefined }] });
+		eventBridgeSendImpl = async () => ({
+			FailedEntryCount: 1,
+			Entries: [
+				{ ErrorCode: "InternalFailure", ErrorMessage: "boom", EventId: "evt-1"},
+				{ ErrorCode: undefined, ErrorMessage: undefined, EventId: "evt-2" },
+			],
+		});
 		const { writeMessagesToEventBridge } = loadModuleUnderTest();
 
 		const actions = [
@@ -173,9 +180,9 @@ describe("writeToEventBridge.writeMessagesToEventBridge", function () {
 
 		const res = await writeMessagesToEventBridge(actions, {});
 
-		expect(capturedEventBridgeCommands).to.have.length(1);
-		expect(res).to.have.length(2);
-		expect(res.map((a) => a.iun)).to.have.members(["iun-1", "iun-2"]);
+		expect(capturedEventBridgeCommands[0].input.Entries).to.have.length(2);
+		expect(res).to.have.length(1);
+		expect(res[0].iun).to.contain("iun-1");
 	});
 
 	it("on timeout exception, routes mapped messages to DLQ via SQS and returns []", async () => {

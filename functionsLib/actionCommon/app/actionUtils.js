@@ -20,7 +20,7 @@ async function getQueueUrl(actionType, details, envVarMapQueueName, envVarMapUrl
     return queueUrl;
 }
 
-async function getCompleteActionType(actionType, details) {
+function getCompleteActionType(actionType, details) {
     if(!details){
         return actionType;
     }

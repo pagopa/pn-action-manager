@@ -47,7 +47,7 @@ async function startHandleEvent(event, context) {
           //... e l'ultima azione inviata ha un tipo differente (immediata) ...
           const notSended = await writeMessagesToEventBridge(actionToSend, context);
           //... . Si procede ad inviare il batch delle azioni immediate alla coda definita per l'utlima azione (che sappiamo essere uguale a quella di tutto il batch)
-          if (notSended != 0) {
+          if (notSended.length  != 0) {
             console.warn("there are 'Not sended item', need to return. Not sended item", notSended)
             return notSended;
           }
@@ -63,7 +63,7 @@ async function startHandleEvent(event, context) {
           //... e l'ultima azione inviata ha un tipo differente (futura) ...
           const notSended = await writeMessagesToDynamo(actionToSend,context);
           //... si procede ad inviare il batch delle azioni future
-          if (notSended != 0) {
+          if (notSended.length  != 0) {
             console.warn("there are 'Not sended item', need to return. Not sended item", notSended)
             return notSended;
           }
