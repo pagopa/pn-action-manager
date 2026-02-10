@@ -35,8 +35,8 @@ describe("eventHandler test ", function () {
     let invokedCount = 0;
 
     const lambda = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./sqsFunctions.js": {
-        putMessages: (_sqsConfig, _actions, _isTimedOut) => {
+      "./eventBridgeFunctions.js": {
+        putMessages: (_actions, _isTimedOut) => {
           invokedCount++;
           return [];
         },
@@ -70,8 +70,8 @@ describe("eventHandler test ", function () {
     let invokedCount = 0;
 
     const lambda = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./sqsFunctions.js": {
-        putMessages: (_sqsConfig, _actions, _isTimedOut) => {
+      "./eventBridgeFunctions.js": {
+        putMessages: (_actions, _isTimedOut) => {
           invokedCount++;
           return [];
         },
@@ -105,8 +105,8 @@ describe("eventHandler test ", function () {
     let invokedCount = 0;
 
     const lambda = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./sqsFunctions.js": {
-        putMessages: (_sqsConfig, _actions, _isTimedOut) => {
+      "./eventBridgeFunctions.js": {
+        putMessages: (_actions, _isTimedOut) => {
           invokedCount++;
           return [];
         },
@@ -140,9 +140,9 @@ describe("eventHandler test ", function () {
     let invokedCount = 0;
 
     const lambda = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./sqsFunctions.js": {
+      "./eventBridgeFunctions.js": {
         // eslint-disable-next-line no-unused-vars
-        putMessages: (_sqsConfig, _actions, _isTimedOut) => {
+        putMessages: (_actions, _isTimedOut) => {
           invokedCount++;
           return [];
         },
@@ -176,8 +176,8 @@ describe("eventHandler test ", function () {
     let invokedCount = 0;
 
     const lambda = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./sqsFunctions.js": {
-        putMessages: (_sqsConfig, _actions, _isTimedOut) => {
+      "./eventBridgeFunctions.js": {
+        putMessages: (_actions, _isTimedOut) => {
           invokedCount++;
           return [];
         },
@@ -210,8 +210,8 @@ describe("eventHandler test ", function () {
     let invokedCount = 0;
 
     const lambda = proxyquire.noCallThru().load("../app/eventHandler.js", {
-      "./sqsFunctions.js": {
-        putMessages: (_sqsConfig, _actions, _isTimedOut) => {
+      "./eventBridgeFunctions.js": {
+        putMessages: (_actions, _isTimedOut) => {
           invokedCount++;
           return [];
         },

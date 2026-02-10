@@ -39,16 +39,16 @@ https://excalidraw.com/#json=64HdbyzbKFlgq_RFe6jC9,9fCK45IQfvKxcMsE3hPeVA
 - Restituisce in risposta un array contenente gli identificativi dei record non lavorati correttamente dove è stata riscontrata un'eccezione.
 
 ### Configurazione
-| Variabile Ambiente          | Descrizione                                                                 | Obbligatorio | Default          |
-|-----------------------------|-----------------------------------------------------------------------------|--------------|------------------|
-| `AWS_REGIONCODE`            | Regione AWS                                                                 | Sì           |                  |
-| `QueueUrlMap`               | Nome della variabile d'ambiente contenente la mappa degli endpoint SQS      | Sì           | QUEUE_URL_MAP    |
-| `ActionQueueMap`            | Nome della variabile d'ambiente contenente la mappa tipo action -> coda     | Sì           | ACTION_QUEUE_MAP |
-| `ActionTimeoutErrorDLQURL`  | Endpoint della DLQ per i timeout                                            | Sì           | -                |
-| `RUN_TOLLERANCE_IN_MILLIS`  | Tolleranza in millisecondi per la chiusura anticipata della lambda          | Sì           | 3000             |
-| `MAX_SQS_BATCH_SIZE`        | Dimensione massima del batch per l’invio alle code SQS                      | Si           | 1                |
-| `ActionLambdasEnabledStart` | Data/ora di inizio finestra di lavoro                                       | -            | 2024-05-10T12:00 |
-| `ActionLambdasEnabledEnd `  | Data/ora di fine finestra di lavoro                                         | -            | 2099-05-30T12:00 |
+| Variabile Ambiente          | Descrizione                                                             | Obbligatorio | Default          |
+|-----------------------------|-------------------------------------------------------------------------|--------------|------------------|
+| `AWS_REGIONCODE`            | Regione AWS                                                             | Sì           |                  |
+| `QueueUrlMap`               | Nome della variabile d'ambiente contenente la mappa degli endpoint SQS  | Sì           | QUEUE_URL_MAP    |
+| `ActionQueueMap`            | Nome della variabile d'ambiente contenente la mappa tipo action -> coda | Sì           | ACTION_QUEUE_MAP |
+| `ActionTimeoutErrorDLQURL`  | Endpoint della DLQ per i timeout                                        | Sì           | -                |
+| `RUN_TOLLERANCE_IN_MILLIS`  | Tolleranza in millisecondi per la chiusura anticipata della lambda      | Sì           | 3000             |
+| `MAX_EVENT_BRIDGE_BATCH`    | Dimensione massima del batch per l’invio all'eventBridge                | Si           | 1                |
+| `ActionLambdasEnabledStart` | Data/ora di inizio finestra di lavoro                                   | -            | 2024-05-10T12:00 |
+| `ActionLambdasEnabledEnd `  | Data/ora di fine finestra di lavoro                                     | -            | 2099-05-30T12:00 |
 
 N.B. L'elaborazione delle action viene presa in carico solo se il campo `createdAt` rientra nell’intervallo temporale compreso tra `ActionLambdasEnabledStart` ed `ActionLambdasEnabledEnd`.
 

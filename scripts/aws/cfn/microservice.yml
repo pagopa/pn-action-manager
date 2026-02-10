@@ -369,10 +369,8 @@ Resources:
         RoleArn: !GetAtt ActionEnqueuerManagerLambdaRole.Arn
         Layer1: !Ref ActionEnqueuerManagerLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}",
+          "TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}###BUS_NAME=arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus",
           {
-            actionQueueMap: !Ref ActionQueueMap,
-            QueueUrlMap: !Ref QueueUrlMap,
             ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
           }
         ]
@@ -424,7 +422,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ScheduledActionsQueueARN
               - !Ref ScheduledValidationActionsQueueARN
               - !Ref ActionEnqueuerManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
@@ -434,6 +431,11 @@ Resources:
               - dynamodb:BatchWriteItem
             Resource:
               - !Ref FutureActionDynamoTableArn
+          - Effect: Allow
+            Action:
+              - events:PutEvents
+            Resource:
+              - !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus
 
   ActionRemoverManagerLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
