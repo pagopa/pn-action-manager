@@ -3,6 +3,7 @@ const { unmarshall } = require("@aws-sdk/util-dynamodb");
 const config = require("config");
 
 const TOLLERANCE_IN_MILLIS = config.get("RUN_TOLLERANCE_IN_MILLIS");
+const BUS_NAME = config.get("BUS_NAME");
 
 const isTimeToLeave = (context) =>
   context.getRemainingTimeInMillis() < TOLLERANCE_IN_MILLIS;
@@ -76,7 +77,6 @@ async function handleEvent(event, context) {
   const isTimedOut = () => isTimeToLeave(context);
 
   let actions = [];
-  let lastDestination;
 
   for (let i = 0; i < event.Records.length; i++) {
     let record = event.Records[i];

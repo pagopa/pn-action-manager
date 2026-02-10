@@ -1,11 +1,16 @@
 const { SendMessageBatchCommand, SQSClient } = require("@aws-sdk/client-sqs");
+const { EventBridgeClient, PutEventsCommand } = require("@aws-sdk/client-eventbridge");
 const { NodeHttpHandler } = require("@aws-sdk/node-http-handler");
 const { ActionUtils } = require("pn-action-common");
 
 const { v4 } = require("uuid");
 const config = require("config");
 
-const { SQSServiceException, TimeoutException, EventBridgeServiceException } = require("./exceptions");
+const {
+  SQSServiceException,
+  TimeoutException,
+  EventBridgeServiceException,
+} = require("./exceptions");
 
 const MAX_EVENT_BRIDGE_BATCH = config.get("MAX_EVENT_BRIDGE_BATCH");
 const DEFAULT_SOCKET_TIMEOUT = config.get("timeout.DEFAULT_SOCKET_TIMEOUT");
@@ -25,7 +30,7 @@ const sqs = new SQSClient({
 });
 const eventBridgeclient = new EventBridgeClient({});
 
-function mapActionToQueueMessage(action) {
+function mapActionToEventBridgeMessage(action) {
   let origAction = Object.assign({}, action);
   origAction.timeslot = action.timeSlot;
 
@@ -45,42 +50,76 @@ function mapActionToQueueMessage(action) {
   return message;
 }
 
-async function putMessages(actions, isTimedOut) {
-  let messagesToSend;
+function mapActionToQueueMessage(action) {
+  let uuid = v4();
+  let origAction = Object.assign({}, action);
+  origAction.timeslot = action.timeSlot;
 
+  if(origAction.details){
+    origAction.details.actionType = action.type;
+  }
+
+  console.debug("origAction", origAction);
+
+  delete origAction.timeSlot;
+  delete origAction.seqNo;
+  const message = {
+    Id: uuid,
+    DelaySeconds: 0,
+    MessageAttributes: {
+      createdAt: {
+        DataType: "String",
+        StringValue: new Date().toISOString(),
+      },
+      eventId: {
+        DataType: "String",
+        StringValue: uuid,
+      },
+      eventType: {
+        DataType: "String",
+        StringValue: "ACTION_GENERIC",
+      },
+      iun: {
+        DataType: "String",
+        StringValue: action.iun,
+      },
+      publisher: {
+        DataType: "String",
+        StringValue: "deliveryPush",
+      },
+    },
+    MessageBody: JSON.stringify(origAction),
+  };
+  return message;
+}
+
+async function putMessages(actions, isTimedOut) {
   while (actions.length > 0 && !isTimedOut()) {
-    messagesToSend = [];
     let currentChunk = actions.splice(0, MAX_EVENT_BRIDGE_BATCH);
-    currentChunk.forEach((action) => {
-      let messageToSend = mapActionToQueueMessage(action);
-      messagesToSend.push(messageToSend);
-    });
+    const messagesToSend = currentChunk.map((action) =>
+      mapActionToEventBridgeMessage(action)
+    );
     try {
-      const failed = await _sendMessages(messagesToSend);
-      if (failed.length != 0) {
-        // TODO
+      const failedActions = await _sendMessages(messagesToSend, currentChunk);
+      if (failedActions.length != 0) {
         console.error(
           "[ACTION_ENQUEUER]",
           "Aborting for an error on sending messages. Failed messages:",
-          failed
+          failedActions
         );
-        currentChunk.forEach((element) => {
-          if (
-            failed.filter((currFailed) => currFailed.Id == element.Id)
-              .length !== 0
-          ) {
-            delete element.Id;
-            actions.push(element);
-          }
+        failedActions.forEach((failedAction) => {
+          actions.push(failedAction);
         });
 
         return actions;
       }
     } catch (ex) {
       if (ex instanceof TimeoutException) {
+        const messagesToSend = currentChunk.map((action) =>
+          mapActionToQueueMessage(action)
+        );
         await manageTimeout(messagesToSend);
-      }
-      else {
+      } else {
         console.log(
           "[ACTION_ENQUEUER]",
           "Adding back the current chunk and aborting"
@@ -126,14 +165,14 @@ async function manageTimeout(messagesToSend) {
   }
 }
 
-async function _sendMessages(messages) {
+async function _sendMessages(messages, originalActions) {
   try {
     if (!messages || messages.length === 0)
       throw new Error("No messages to send");
 
     console.debug(
       "[ACTION_ENQUEUER]",
-      `Proceeding to send ${messages.length} messages to event bridge bug ${BUS_NAME}`
+      `Proceeding to send ${messages.length} messages to event bridge bus ${BUS_NAME}`
     );
 
     console.log(
@@ -154,13 +193,17 @@ async function _sendMessages(messages) {
 
     console.debug("[ACTION_ENQUEUER]", "Sent message response", response);
     if (failedEntryCount > 0) {
-      const failedEntry = messages.filter((_, index) => {
-        const entry = response.Entries[index];
+      const failedActions = (originalActions ?? []).filter((_, index) => {
+        const entry = response?.Entries?.[index];
         return entry && entry.ErrorCode != null;
       });
-      console.warn("[ACTION_ENQUEUER]", "Failed Messages", failedEntry);
 
-      return [...failedEntry];
+      console.warn(
+        "[ACTION_ENQUEUER]",
+        `EventBridge PutEvents returned ${failedEntryCount} failed entries; rescheduling only failed messages`
+      );
+
+      return [...failedActions];
     }
   } catch (exc) {
 
@@ -186,6 +229,7 @@ async function _sendMessages(messages) {
 }
 
 async function sendTimeoutMessages(messages) {
+  let input;
   try {
     if (!messages || messages.length === 0)
       throw new Error("No messages to send");
@@ -195,9 +239,12 @@ async function sendTimeoutMessages(messages) {
       `Proceeding to send ${messages.length} messages to timeout queue ${config.get("TIMEOUT_DLQ")}`
     );
 
-    const input = {
-      Entries: messages,
-      QUEUE_URL: config.get("TIMEOUT_DLQ"),
+    input = {
+      QueueUrl: config.get("TIMEOUT_DLQ"),
+      Entries: messages.map((msg) => ({
+        Id: v4(),
+        MessageBody: JSON.stringify(msg),
+      })),
     };
 
     console.log(
@@ -219,7 +266,7 @@ async function sendTimeoutMessages(messages) {
         "[ACTION_ENQUEUER]",
         "Error sending messages",
         JSON.stringify(messages),
-        sqsParams,
+        input,
         exc
       );
       throw new SQSServiceException(exc);

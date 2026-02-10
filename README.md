@@ -49,6 +49,7 @@ https://excalidraw.com/#json=64HdbyzbKFlgq_RFe6jC9,9fCK45IQfvKxcMsE3hPeVA
 | `MAX_EVENT_BRIDGE_BATCH`    | Dimensione massima del batch per l’invio all'eventBridge                | Si           | 1                |
 | `ActionLambdasEnabledStart` | Data/ora di inizio finestra di lavoro                                   | -            | 2024-05-10T12:00 |
 | `ActionLambdasEnabledEnd `  | Data/ora di fine finestra di lavoro                                     | -            | 2099-05-30T12:00 |
+| `BUS_NAME `                 | ARN dell'event bus su cui mandare gli eventi                            | Si           | -                |
 
 N.B. L'elaborazione delle action viene presa in carico solo se il campo `createdAt` rientra nell’intervallo temporale compreso tra `ActionLambdasEnabledStart` ed `ActionLambdasEnabledEnd`.
 

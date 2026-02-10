@@ -8,7 +8,7 @@ describe("eventHandler test ", function () {
   before(() => {
     process.env[config.get("ACTION_MAP_ENV_VARIABLE")] =
       '{"DOCUMENT_CREATION_RESPONSE_SENDER_ACK":"actionId-queue2","DOCUMENT_CREATION_RESPONSE":"actionId-queue2","NOTIFICATION_CREATION":"actionId-queue2","NOTIFICATION_VALIDATION":"actionId-queue1"}';
-
+    process.env[config.get("BUS_NAME")] = "test-bus";
     process.env[config.get("QUEUE_ENDPOINTS_ENV_VARIABLE")] =
       '{"actionId-queue2":"https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions2", "actionId-queue1":"https://sqs.eu-south-1.amazonaws.com/830192246553/pn-delivery_push_actions1"}';
   });
@@ -121,7 +121,7 @@ describe("eventHandler test ", function () {
     });
     expect(result).to.be.not.null;
     expect(result.batchItemFailures).to.be.empty;
-    expect(invokedCount).equal(2);
+    expect(invokedCount).equal(1);
   });
   it("send record in two Queue - three element - 1", async () => {
     const testData = require("./streamData/three-twoQueue-permutation1.json");
@@ -157,7 +157,7 @@ describe("eventHandler test ", function () {
     });
     expect(result).to.be.not.null;
     expect(result.batchItemFailures).to.be.empty;
-    expect(invokedCount).equal(2);
+    expect(invokedCount).equal(1);
   });
   it("send record in two Queue - three element - 2", async () => {
     const testData = require("./streamData/three-twoQueue-permutation2.json");
@@ -192,7 +192,7 @@ describe("eventHandler test ", function () {
     });
     expect(result).to.be.not.null;
     expect(result.batchItemFailures).to.be.empty;
-    expect(invokedCount).equal(2);
+    expect(invokedCount).equal(1);
   });
 
   it("send record in two Queue - three element - 3", async () => {
@@ -226,6 +226,6 @@ describe("eventHandler test ", function () {
     });
     expect(result).to.be.not.null;
     expect(result.batchItemFailures).to.be.empty;
-    expect(invokedCount).equal(3);
+    expect(invokedCount).equal(1);
   });
 });
