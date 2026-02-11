@@ -8,6 +8,12 @@ Parameters:
     Type: String
     Description: ''
 
+  # Centralize EventBridge bus ARN to avoid duplication/drift
+  CoreEventBusArn:
+    Type: String
+    Description: 'ARN of the EventBridge bus used by pn-action-manager (used in both env vars and IAM policies)'
+    Default: !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus
+
   TemplateBucketBaseUrl:
     Type: String
     Description: 'The S3 bucket from which to fetch the templates used by this stack.'
@@ -609,7 +615,7 @@ Resources:
         RoleArn: !GetAtt ActionRouterLambdaRole.Arn
         Layer1: !Ref ActionRouterLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}###BUS_NAME=arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus",
+          "FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}######BUS_NAME=${CoreEventBusArn}",
           {
             FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
             ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
@@ -676,4 +682,4 @@ Resources:
             Action:
               - events:PutEvents
             Resource:
-              - !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus
+              - !Ref CoreEventBusArn
