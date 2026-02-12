@@ -43,10 +43,14 @@ function mapActionToEventBridgeMessage(action) {
   delete origAction.timeSlot;
   delete origAction.seqNo;
   const message = {
-    Source: "deliveryPush",
-    DetailType: ActionUtils.getCompleteActionType(action?.type, action?.details),
-    Detail: JSON.stringify(origAction)
-  };
+      Source: "pn-action-manager",
+      DetailType: "ActionManagerEventOutcome",
+      Detail: {
+        body: JSON.stringify(origAction),
+        routingActionType: ActionUtils.getCompleteActionType(action?.type, action?.details)
+      }
+    };
+
   return message;
 }
 
