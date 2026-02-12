@@ -106,7 +106,7 @@ function mapActionToEventBridgeMessage(action) {
     console.log("copiedAction", JSON.stringify(copiedAction));
 
     const message = {
-      Source: "deliveryPush",
+      Source: "pn-action-manager",
       DetailType: ActionUtils.getCompleteActionType(action?.type, action?.details),
       Detail: JSON.stringify(copiedAction)
     };
