@@ -134,18 +134,12 @@ aws dynamodb describe-kinesis-streaming-destination \
 
 echo "Fine - Fase 6 : Creazione legame stream Kinesis con stream DynamoDB"
 
-echo "Inizio - Fase 7 : Creazione code SQS"
-queues="pn-delivery_push_actions pn-delivery_push_validation_actions"
+echo "Inizio - Fase 7 : Creazione event bridge"
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+      events create-event-bus \
+    --name core-bus
 
-for qn in  $( echo $queues | tr " " "\n" ) ; do
-    echo creating queue $qn ...
-
-    aws --profile default --region us-east-1 --endpoint-url http://localstack:4566 \
-        sqs create-queue \
-        --attributes '{"DelaySeconds":"2"}' \
-        --queue-name $qn
-done
-echo "Fine - Fase 7 : Creazione code SQS"
+echo "Fine - Fase 7 : Creazione event bridge"
 
 # Mi posiziono nella cartella in cui sono presenti le lambda
 cd ./functions

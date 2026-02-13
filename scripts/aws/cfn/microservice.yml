@@ -8,6 +8,12 @@ Parameters:
     Type: String
     Description: ''
 
+  # Centralize EventBridge bus ARN to avoid duplication/drift
+  CoreEventBusArn:
+    Type: String
+    Description: 'ARN of the EventBridge bus used by pn-action-manager (used in both env vars and IAM policies)'
+    Default: !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus
+
   TemplateBucketBaseUrl:
     Type: String
     Description: 'The S3 bucket from which to fetch the templates used by this stack.'
@@ -369,11 +375,10 @@ Resources:
         RoleArn: !GetAtt ActionEnqueuerManagerLambdaRole.Arn
         Layer1: !Ref ActionEnqueuerManagerLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}",
+          "TIMEOUT_DLQ=${ActionTimeoutErrorDLQURL}###BUS_NAME=${CoreEventBusArn}",
           {
-            actionQueueMap: !Ref ActionQueueMap,
-            QueueUrlMap: !Ref QueueUrlMap,
-            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
+            ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL,
+            CoreEventBusArn: !Ref CoreEventBusArn
           }
         ]
 
@@ -424,7 +429,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ScheduledActionsQueueARN
               - !Ref ScheduledValidationActionsQueueARN
               - !Ref ActionEnqueuerManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
@@ -434,6 +438,11 @@ Resources:
               - dynamodb:BatchWriteItem
             Resource:
               - !Ref FutureActionDynamoTableArn
+          - Effect: Allow
+            Action:
+              - events:PutEvents
+            Resource:
+              - !Ref CoreEventBusArn
 
   ActionRemoverManagerLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
@@ -609,10 +618,8 @@ Resources:
         RoleArn: !GetAtt ActionRouterLambdaRole.Arn
         Layer1: !Ref ActionRouterLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}",
+          "FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}######BUS_NAME=${CoreEventBusArn}",
           {
-            actionQueueMap: !Ref ActionQueueMap,
-            QueueUrlMap: !Ref QueueUrlMap,
             FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
             ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
           }
@@ -665,7 +672,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ScheduledActionsQueueARN
               - !Ref ScheduledValidationActionsQueueARN
               - !Ref ActionRouterManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
@@ -675,3 +681,8 @@ Resources:
               - "dynamodb:BatchWriteItem"
             Resource:
               - !Ref FutureActionDynamoTableArn
+          - Effect: Allow
+            Action:
+              - events:PutEvents
+            Resource:
+              - !Ref CoreEventBusArn
