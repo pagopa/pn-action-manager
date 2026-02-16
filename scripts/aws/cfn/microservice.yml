@@ -53,25 +53,9 @@ Parameters:
     Type: String
     Description: 'Exact container image URI with full repository and image digest'
 
-  ActionQueueMap:
-    Type: String
-    Description: 'Define relation from actionType to sqs queue name'
-
-  QueueUrlMap:
-    Type: String
-    Description: 'Define relation from queue name to sqs queue url'
-
   ActionTimeoutErrorDLQURL:
     Type: String
     Description: 'DLQ URL for ActionRouter lambda'
-
-  ScheduledActionsQueueARN:
-    Type: String
-    Description: 'Send and pull ready-to-do actions th this queue'
-
-  ScheduledValidationActionsQueueARN:
-    Type: String
-    Description: 'Send and pull ready-to-do actions th this queue'
 
   ActionTimeoutErrorDLQARN:
     Type: String
@@ -429,7 +413,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ScheduledValidationActionsQueueARN
               - !Ref ActionEnqueuerManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
           - Effect: Allow
@@ -672,7 +655,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ScheduledValidationActionsQueueARN
               - !Ref ActionRouterManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
           - Effect: Allow
