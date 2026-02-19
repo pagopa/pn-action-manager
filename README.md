@@ -83,18 +83,18 @@ N.B. L'elaborazione delle action viene presa in carico solo se il campo `created
 - Restituisce in risposta un array contenente gli identificativi dei record non lavorati correttamente dove è stata riscontrata un'eccezione.
 
 ### Configurazione
-| Variabile Ambiente             | Descrizione                                                                 | Obbligatorio | Default                       |
-|--------------------------------|-----------------------------------------------------------------------------|--------------|-------------------------------|
-| `AWS_REGIONCODE`               | Regione AWS                                                                 | Sì           |                               |
-| `QueueUrlMap`                  | Nome della variabile d'ambiente contenente la mappa degli endpoint SQS      | Sì           | QUEUE_URL_MAP                 |
-| `ActionQueueMap`               | Nome della variabile d'ambiente contenente la mappa tipo action -> coda     | Sì           | ACTION_QUEUE_MAP              |
-| `FutureActionDynamoTableName`  | Nome della tabella DynamoDB per le future action                            | Sì           | pn-FutureAction               |
-| `MAX_SQS_BATCH_SIZE`           | Dimensione massima del batch per l’invio alle code SQS                      | Si           | 1                             |
-| `MAX_DYNAMO_BATCH`             | Dimensione massima del batch per l’inserimento su DynamoDB                  | Si           | 1                             |
-| `RUN_TOLLERANCE_IN_MILLIS`     | Tolleranza in millisecondi per la chiusura anticipata della lambda          | -            | 3000                          |
-| `ACTION_TIMEOUT_ERROR_DLQ_URL` | Endpoint della DLQ per errori di timeout                                    | Si           | ACTION_TIMEOUT_ERROR_DLQ_URL  |
-| `ActionLambdasEnabledStart`    | Data/ora di inizio finestra di lavoro                                       | -            | 2024-05-10T12:00              |
-| `ActionLambdasEnabledEnd`      | Data/ora di fine finestra di lavoro                                         | -            | 2099-05-30T12:00              |
+| Variabile Ambiente             | Descrizione                                                             | Obbligatorio | Default                       |
+|--------------------------------|-------------------------------------------------------------------------|--------------|-------------------------------|
+| `AWS_REGIONCODE`               | Regione AWS                                                             | Sì           |                               |
+| `QueueUrlMap`                  | Nome della variabile d'ambiente contenente la mappa degli endpoint SQS  | Sì           | QUEUE_URL_MAP                 |
+| `ActionQueueMap`               | Nome della variabile d'ambiente contenente la mappa tipo action -> coda | Sì           | ACTION_QUEUE_MAP              |
+| `FutureActionDynamoTableName`  | Nome della tabella DynamoDB per le future action                        | Sì           | pn-FutureAction               |
+| `MAX_EVENT_BRIDGE_BATCH`       | degli eventi a EventBridge (PutEvents)                                  | Si           | 1                             |
+| `MAX_DYNAMO_BATCH`             | Dimensione massima del batch per l’inserimento su DynamoDB              | Si           | 1                             |
+| `RUN_TOLLERANCE_IN_MILLIS`     | Tolleranza in millisecondi per la chiusura anticipata della lambda      | -            | 3000                          |
+| `ACTION_TIMEOUT_ERROR_DLQ_URL` | Endpoint della DLQ per errori di timeout                                | Si           | ACTION_TIMEOUT_ERROR_DLQ_URL  |
+| `ActionLambdasEnabledStart`    | Data/ora di inizio finestra di lavoro                                   | -            | 2024-05-10T12:00              |
+| `ActionLambdasEnabledEnd`      | Data/ora di fine finestra di lavoro                                     | -            | 2099-05-30T12:00              |
 
 N.B. L'elaborazione delle action viene presa in carico solo se il campo `createdAt` rientra nell’intervallo temporale compreso tra `ActionLambdasEnabledStart` ed `ActionLambdasEnabledEnd`.
 ## Testing in locale
