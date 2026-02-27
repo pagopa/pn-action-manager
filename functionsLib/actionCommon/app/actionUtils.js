@@ -25,7 +25,7 @@ function getCompleteActionType(actionType, details) {
         return actionType;
     }
     if (actionType === 'DOCUMENT_CREATION_RESPONSE' && details.documentCreationType === 'SENDER_ACK') {
-        return actionType + '_SENDER_ACK';
+        return actionType + '_VALIDATION';
     }
     return actionType;
 }
@@ -83,5 +83,6 @@ async function getQueueFromParameterStore(completeActionType, parameterStoreName
 module.exports = {
     getQueueNameFromParameterStore,
     getQueueName,
-    getQueueUrl
+    getQueueUrl,
+    getCompleteActionType
 }
