@@ -42,8 +42,6 @@ https://excalidraw.com/#json=64HdbyzbKFlgq_RFe6jC9,9fCK45IQfvKxcMsE3hPeVA
 | Variabile Ambiente          | Descrizione                                                             | Obbligatorio | Default          |
 |-----------------------------|-------------------------------------------------------------------------|--------------|------------------|
 | `AWS_REGIONCODE`            | Regione AWS                                                             | Sì           |                  |
-| `QueueUrlMap`               | Nome della variabile d'ambiente contenente la mappa degli endpoint SQS  | Sì           | QUEUE_URL_MAP    |
-| `ActionQueueMap`            | Nome della variabile d'ambiente contenente la mappa tipo action -> coda | Sì           | ACTION_QUEUE_MAP |
 | `ActionTimeoutErrorDLQURL`  | Endpoint della DLQ per i timeout                                        | Sì           | -                |
 | `RUN_TOLLERANCE_IN_MILLIS`  | Tolleranza in millisecondi per la chiusura anticipata della lambda      | Sì           | 3000             |
 | `MAX_EVENT_BRIDGE_BATCH`    | Dimensione massima del batch per l’invio all'eventBridge                | Si           | 1                |
@@ -87,8 +85,6 @@ N.B. L'elaborazione delle action viene presa in carico solo se il campo `created
 | Variabile Ambiente             | Descrizione                                                             | Obbligatorio | Default                       |
 |--------------------------------|-------------------------------------------------------------------------|--------------|-------------------------------|
 | `AWS_REGIONCODE`               | Regione AWS                                                             | Sì           |                               |
-| `QueueUrlMap`                  | Nome della variabile d'ambiente contenente la mappa degli endpoint SQS  | Sì           | QUEUE_URL_MAP                 |
-| `ActionQueueMap`               | Nome della variabile d'ambiente contenente la mappa tipo action -> coda | Sì           | ACTION_QUEUE_MAP              |
 | `FutureActionDynamoTableName`  | Nome della tabella DynamoDB per le future action                        | Sì           | pn-FutureAction               |
 | `MAX_EVENT_BRIDGE_BATCH`       | degli eventi a EventBridge (PutEvents)                                  | Si           | 1                             |
 | `MAX_DYNAMO_BATCH`             | Dimensione massima del batch per l’inserimento su DynamoDB              | Si           | 1                             |
