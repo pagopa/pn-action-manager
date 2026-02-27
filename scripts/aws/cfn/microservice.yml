@@ -618,10 +618,8 @@ Resources:
         RoleArn: !GetAtt ActionRouterLambdaRole.Arn
         Layer1: !Ref ActionRouterLambdaLibrariesLayer
         EnvVariables: !Sub [
-          "ACTION_QUEUE_MAP=${actionQueueMap}###QUEUE_URL_MAP=${QueueUrlMap}###FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}",
+          "FUTURE_ACTION_TTL_EXTRA_DAYS=${FutureActionTtlExtraDays}###ACTION_TIMEOUT_ERROR_DLQ_URL=${ActionTimeoutErrorDLQURL}######BUS_NAME=${CoreEventBusArn}",
           {
-            actionQueueMap: !Ref ActionQueueMap,
-            QueueUrlMap: !Ref QueueUrlMap,
             FutureActionTtlExtraDays: !Ref FutureActionTtlExtraDays,
             ActionTimeoutErrorDLQURL: !Ref ActionTimeoutErrorDLQURL
           }
@@ -674,7 +672,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ScheduledActionsQueueARN
               - !Ref ScheduledValidationActionsQueueARN
               - !Ref ActionRouterManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
@@ -684,3 +681,8 @@ Resources:
               - "dynamodb:BatchWriteItem"
             Resource:
               - !Ref FutureActionDynamoTableArn
+          - Effect: Allow
+            Action:
+              - events:PutEvents
+            Resource:
+              - !Ref CoreEventBusArn

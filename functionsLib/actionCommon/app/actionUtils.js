@@ -83,5 +83,6 @@ async function getQueueFromParameterStore(completeActionType, parameterStoreName
 module.exports = {
     getQueueNameFromParameterStore,
     getQueueName,
-    getQueueUrl
+    getQueueUrl,
+    getCompleteActionType
 }
