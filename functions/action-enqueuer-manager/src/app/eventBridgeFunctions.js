@@ -51,6 +51,10 @@ function mapActionToEventBridgeMessage(action) {
       }
     };
 
+    Source: "pn-action-manager",
+    DetailType: ActionUtils.getCompleteActionType(action?.type, action?.details),
+    Detail: JSON.stringify(origAction)
+  };
   return message;
 }
 
