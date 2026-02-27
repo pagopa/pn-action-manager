@@ -1,0 +1,10 @@
+{
+  "Parameters": {
+    "CdcPnActionShards": "8",
+    "CdcPnFutureActionShards": "4",
+    "CdcActionStandardAlarmThresholdsMs": "2000000",
+    "CdcActionOnCallAlarmThresholdsMs": "2000000",
+    "CdcPnActionStreamRetentionHours": "168",
+    "CdcPnFutureActionStreamRetentionHours": "168"
+  }
+}
