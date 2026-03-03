@@ -45,10 +45,10 @@ function mapActionToEventBridgeMessage(action) {
   const message = {
       Source: "pn-action-manager",
       DetailType: "ActionManagerEventOutcome",
-      Detail: {
-        body: JSON.stringify(origAction),
-        routingActionType: ActionUtils.getCompleteActionType(action?.type, action?.details)
-      }
+      Detail: JSON.stringify({
+          body: origAction,
+          routingActionType: ActionUtils.getCompleteActionType(action?.type, action?.details)
+        })
     };
   
   return message;
