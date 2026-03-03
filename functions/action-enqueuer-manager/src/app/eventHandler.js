@@ -1,9 +1,9 @@
-const { putMessages } = require("./sqsFunctions");
+const { putMessages } = require("./eventBridgeFunctions");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 const config = require("config");
-const { ActionUtils } = require("pn-action-common");
 
 const TOLLERANCE_IN_MILLIS = config.get("RUN_TOLLERANCE_IN_MILLIS");
+const BUS_NAME = config.get("BUS_NAME");
 
 const isTimeToLeave = (context) =>
   context.getRemainingTimeInMillis() < TOLLERANCE_IN_MILLIS;
@@ -25,34 +25,17 @@ function isActionLogicalDeleted(action){
   return action.logicalDeleted === true;
 }
 
-const sendMessages = async (destinationEndpoint, actions, timeoutFn) => {
+const sendMessages = async (actions, timeoutFn) => {
   const notSendedResult = {
     batchItemFailures: [],
   };
 
-  if (!destinationEndpoint) {
-    actions.forEach((element) =>
-      notSendedResult.batchItemFailures.push({ itemIdentifier: element.seqNo })
-    );
-    console.error(
-      "[ACTION_ENQUEUER]",
-      `Destination Enpoint ${destinationEndpoint} not valid`,
-      notSendedResult
-    );
-    return notSendedResult;
-  }
-
-  let sqsParams = { endpoint: destinationEndpoint, timeoutEndpoint: config.get("TIMEOUT_DLQ")};
   console.debug(
     "[ACTION_ENQUEUER]",
-    `Parameters: ${sqsParams}`
-  );
-  console.debug(
-    "[ACTION_ENQUEUER]",
-    `Sending ${actions.length} actions to SQS queue ${sqsParams.endpoint}`
+    `Sending ${actions.length} actions to event bridge ${BUS_NAME}`
   );
 
-  const notSended = await putMessages(sqsParams, actions, timeoutFn);
+  const notSended = await putMessages(actions, timeoutFn);
   if (notSended.length !== 0) {
     notSended.forEach((element) =>
       notSendedResult.batchItemFailures.push({ itemIdentifier: element.seqNo })
@@ -94,7 +77,6 @@ async function handleEvent(event, context) {
   const isTimedOut = () => isTimeToLeave(context);
 
   let actions = [];
-  let lastDestination;
 
   for (let i = 0; i < event.Records.length; i++) {
     let record = event.Records[i];
@@ -107,42 +89,6 @@ async function handleEvent(event, context) {
 
       action.seqNo = record.kinesis.sequenceNumber;
 
-      let currentDestination;
-      try {
-        currentDestination = await ActionUtils.getQueueUrl(
-          action?.type,
-          action?.details,
-          config.get("ACTION_MAP_ENV_VARIABLE"),
-          config.get("QUEUE_ENDPOINTS_ENV_VARIABLE")
-        );
-      } catch (e) {
-        console.error(
-          "[ACTION_ENQUEUER]",
-          `No endpoint queue for action`,
-          action,
-          e
-        );
-        emptyResult.batchItemFailures.push(action.seqNo);
-        return emptyResult;
-      }
-
-      console.debug("ENDOPINT ATTUALE", currentDestination);
-      //  destination changed
-      if (lastDestination && currentDestination != lastDestination) {
-        // send records to previous destination
-        const notSended = await sendMessages(
-          lastDestination,
-          actions,
-          isTimedOut
-        );
-        if (notSended.batchItemFailures.length != 0) {
-          return notSended;
-        }
-        actions = [];
-      }
-      //destination endpoint update
-      lastDestination = currentDestination;
-
       actions.push(action);
     } else {
       console.log("[ACTION_ENQUEUER]", "Discarded record", decodedRecord);
@@ -154,7 +100,7 @@ async function handleEvent(event, context) {
       "Sending last actions",
       JSON.stringify(actions)
     );
-    const notSended = await sendMessages(lastDestination, actions, isTimedOut);
+    const notSended = await sendMessages(actions, isTimedOut);
     if (notSended.batchItemFailures.length != 0) {
       return notSended;
     }

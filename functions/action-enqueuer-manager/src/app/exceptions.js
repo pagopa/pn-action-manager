@@ -5,6 +5,13 @@ class SQSServiceException extends Error {
   }
 }
 
+class EventBridgeServiceException extends Error {
+  constructor(e) {
+    super(`${e.message}`);
+    this.name = "EventBridgeServiceException";
+  }
+}
+
 class TimeoutException extends Error {
   constructor(e) {
     super(`${e.message}`);
@@ -14,5 +21,6 @@ class TimeoutException extends Error {
 
 module.exports = {
   SQSServiceException,
-  TimeoutException
+  TimeoutException,
+  EventBridgeServiceException
 };
