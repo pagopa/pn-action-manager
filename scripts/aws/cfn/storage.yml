@@ -82,32 +82,6 @@ Resources:
         LogsKinesisSourceStreamArn: !Ref LogsKinesisSourceStreamArn
         LogGroupRetention: !Ref LogRetention
 
-  ActionRouterManagerDLQ:
-    Type: AWS::CloudFormation::Stack
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
-      Parameters:
-        QueueName: !Sub '${ProjectName}-action_manager_action_router_DLQ'
-        DelaySeconds: 1
-        AlarmSNSTopicName: !Ref AlarmSNSTopicName
-        HasDLQ: "false"
-        QueueHasAlarm: "true"
-
-  ActionEnqueuerManagerDLQ:
-    Type: AWS::CloudFormation::Stack
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
-      Parameters:
-        QueueName: !Sub '${ProjectName}-action_manager_action_enqueuer_DLQ'
-        DelaySeconds: 1
-        AlarmSNSTopicName: !Ref AlarmSNSTopicName
-        HasDLQ: "false"
-        QueueHasAlarm: "true"
-
   ActionTimeoutErrorDLQ:
     Type: AWS::CloudFormation::Stack
     UpdateReplacePolicy: Retain
@@ -281,20 +255,6 @@ Outputs:
   ActionRemoverManagerLambdaName:
     Value: !Sub "${ProjectName}-actionRemover-manager"
 
-  ActionRouterManagerDLQARN:
-    Value: !GetAtt ActionRouterManagerDLQ.Outputs.QueueARN
-    Description: ActionRouterManagerDLQ queue ARN
-  ActionRouterManagerAlarmARN:
-    Value: !GetAtt ActionRouterManagerDLQ.Outputs.SqsDLQAlarmArn
-    Description: ActionRouterManagerDLQ alarm ARN
-
-  ActionEnqueuerManagerDLQARN:
-    Value: !GetAtt ActionEnqueuerManagerDLQ.Outputs.QueueARN
-    Description: ActionEnqueuerManagerDLQ queue ARN
-  ActionEnqueuerManagerDLQAlarmARN:
-    Value: !GetAtt ActionEnqueuerManagerDLQ.Outputs.SqsDLQAlarmArn
-    Description: ActionEnqueuerManagerDLQ alarm ARN
-
   ActionTimeoutErrorDLQARN:
     Value: !GetAtt ActionTimeoutErrorDLQ.Outputs.QueueARN
     Description: ActionTimeoutErrorDLQ queue ARN
@@ -330,6 +290,14 @@ Outputs:
     Value: !GetAtt CdcPnActionStream.Outputs.KinesisStreamArn
     Description: "Kinesis source stream name ARN"
 
+  CdcPnActionName:
+    Value: !GetAtt CdcPnActionStream.Outputs.KinesisStreamName
+    Description: "Kinesis source stream name"
+
   CdcPnFutureActionArn:
     Value: !GetAtt CdcPnFutureActionStream.Outputs.KinesisStreamArn
     Description: "Kinesis source stream name ARN"
+
+  CdcPnFutureActionName:
+    Value: !GetAtt CdcPnFutureActionStream.Outputs.KinesisStreamName
+    Description: "Kinesis source stream name"

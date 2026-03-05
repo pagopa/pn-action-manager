@@ -20,17 +20,13 @@ Parameters:
   ActionEnqueuerManagerLambdaName:
     Type: String
 
-  ActionEnqueuerManagerDLQAlarmARN:
-    Type: String
-    Description: 'DLQ ARN for ActionEnqueuer Lambda'
-
-  ActionEnqueuerManagerDLQARN:
-    Type: String
-    Description: 'DLQ ARN for ActionEnqueuer Lambda'
-
   CdcPnFutureActionArn:
     Type: String
     Description: 'Kinesis stream for pn-futureAction'
+
+  CdcPnFutureActionName:
+    Type: String
+    Description: 'Kinesis stream name for pn-futureAction'
 
   # OpenApi Bucket params
   MicroserviceBucketName:
@@ -81,6 +77,10 @@ Parameters:
   CdcPnActionArn:
     Type: String
     Description: 'Kinesis stream for pn-action'
+
+  CdcPnActionName:
+    Type: String
+    Description: 'Kinesis stream name for pn-action'
 
   ActionRouterManagerDLQARN:
     Type: String
@@ -241,6 +241,20 @@ Parameters:
     Type: Number
     Description: maximum autoscaling number of tasks
 
+  ESMKinesisFailureNotificationsBucketName:
+    Type: String
+    Description: "S3 bucket name for ESM Kinesis failure notifications"
+
+  ActionEnqueuerManagerKinesisMaximumRecordAge:
+    Type: Number
+    Description: 'Maximum age in seconds of a record that Lambda reads from Kinesis before being discarded and sent to the onFailure destination. Default is 7 days (604800 seconds)'
+    Default: 604800 # 7 days in seconds
+
+  ActionRouterKinesisMaximumRecordAge:
+    Type: Number
+    Description: 'Maximum age in seconds of a record that Lambda reads from Kinesis before being discarded and sent to the onFailure destination. Default is 7 days (604800 seconds)'
+    Default: 604800 # 7 days in seconds
+
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -303,14 +317,13 @@ Resources:
   # CDC To ActionEnqueuer
   ActionEnqueuerManagerKinesisSource:
     Type: AWS::Lambda::EventSourceMapping
+    DependsOn:
+      - ActionEnqueuerManagerLambdaPolicy
     Properties:
       BatchSize: !Ref ActionEnqueuerKinesisBatchSize
       BisectBatchOnFunctionError: true
       EventSourceArn: !Ref CdcPnFutureActionArn
       FunctionName: !GetAtt ActionEnqueuerManagerLambda.Outputs.FunctionName
-      DestinationConfig:
-        OnFailure:
-          Destination: !Ref ActionEnqueuerManagerDLQARN
       FunctionResponseTypes:
         - ReportBatchItemFailures
       FilterCriteria:
@@ -324,7 +337,35 @@ Resources:
                 - ']}]}}}'
       MaximumBatchingWindowInSeconds: 300
       MaximumRetryAttempts: 5
+      MaximumRecordAgeInSeconds: !Ref ActionEnqueuerManagerKinesisMaximumRecordAge
       StartingPosition: TRIM_HORIZON
+      DestinationConfig:
+        OnFailure:
+          Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+
+  ActionEnqueuerManagerKinesisFailuresAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-ActionEnqueuerManager-ESM-Alarm"
+      AlarmDescription: "CloudWatch alarm for when ActionEnqueuerManagerLambda has Kinesis stream read failures, which can indicate problems with the function processing or with the stream itself."
+      TreatMissingData: notBreaching        
+      AlarmActions:
+        - !Ref AlarmSNSTopicArn
+      OKActions:
+        - !Ref AlarmSNSTopicArn
+      Dimensions:
+        - Value: !Ref ActionEnqueuerManagerLambda
+          Name: FunctionName
+        - Value: !Ref CdcPnFutureActionName
+          Name: StreamName
+      DatapointsToAlarm: 1           
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 6
+      Period: 600
+      Namespace: ESM/Kinesis   
+      MetricName: ProcessingFailures
+      Statistic: Maximum      
+      Threshold: 1
 
   ActionEnqueuerManagerLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
@@ -406,7 +447,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ActionEnqueuerManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
           - Effect: Allow
             Action:
@@ -419,6 +459,15 @@ Resources:
               - events:PutEvents
             Resource:
               - !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}/*
 
   ActionRemoverManagerLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
@@ -544,14 +593,13 @@ Resources:
   # CDC to Lambda action router
   ActionRouterKinesisSource:
     Type: AWS::Lambda::EventSourceMapping
+    DependsOn:
+      - ActionRouterLambdaPolicy
     Properties:
       BatchSize: !Ref ActionRouterManagerKinesisBatchSize
       BisectBatchOnFunctionError: true
       EventSourceArn: !Ref CdcPnActionArn
       FunctionName: !GetAtt ActionRouterLambda.Outputs.FunctionName
-      DestinationConfig:
-        OnFailure:
-          Destination: !Ref ActionRouterManagerDLQARN
       FunctionResponseTypes:
         - ReportBatchItemFailures
       FilterCriteria:
@@ -565,7 +613,35 @@ Resources:
                 - ']}]}}}'
       MaximumBatchingWindowInSeconds: 300
       MaximumRetryAttempts: 5
+      MaximumRecordAgeInSeconds: !Ref ActionRouterKinesisMaximumRecordAge
       StartingPosition: TRIM_HORIZON
+      DestinationConfig:
+        OnFailure:
+          Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+
+  ActionRouterKinesisFailuresAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-ActionRouterManager-ESM-Alarm"
+      AlarmDescription: "CloudWatch alarm for when ActionRouterManagerLambda has Kinesis stream read failures, which can indicate problems with the function processing or with the stream itself."
+      TreatMissingData: notBreaching        
+      AlarmActions:
+        - !Ref AlarmSNSTopicArn
+      OKActions:
+        - !Ref AlarmSNSTopicArn
+      Dimensions:
+        - Value: !Ref ActionRouterManagerLambdaName
+          Name: FunctionName
+        - Value: !Ref CdcPnActionName
+          Name: StreamName
+      DatapointsToAlarm: 1           
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 6
+      Period: 600
+      Namespace: ESM/Kinesis   
+      MetricName: ProcessingFailures
+      Statistic: Maximum      
+      Threshold: 1
 
   ActionRouterLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
@@ -648,7 +724,6 @@ Resources:
             Action:
               - sqs:SendMessage
             Resource:
-              - !Ref ActionRouterManagerDLQARN
               - !Ref ActionTimeoutErrorDLQARN
           - Effect: Allow
             Action:
@@ -661,3 +736,12 @@ Resources:
               - events:PutEvents
             Resource:
               - !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${ProjectName}-CoreEventBus
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}/*
