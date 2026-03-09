@@ -369,6 +369,8 @@ Resources:
 
   ActionEnqueuerManagerLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
+    DependsOn:
+      - ActionEnqueuerManagerLambdaPolicy
     Properties:
       CompatibleRuntimes:
         - !Ref LambdaRuntime
