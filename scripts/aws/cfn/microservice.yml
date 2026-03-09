@@ -471,6 +471,8 @@ Resources:
 
   ActionRemoverManagerLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
+    DependsOn:
+      - ActionRemoverManagerLambdaPolicy
     Properties:
       CompatibleRuntimes:
         - !Ref LambdaRuntime
@@ -645,6 +647,8 @@ Resources:
 
   ActionRouterLambdaLibrariesLayer:
     Type: AWS::Lambda::LayerVersion
+    DependsOn:
+      - ActionRouterLambdaPolicy
     Properties:
       CompatibleRuntimes:
         - !Ref LambdaRuntime
