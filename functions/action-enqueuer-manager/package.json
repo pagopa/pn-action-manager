@@ -37,6 +37,6 @@
     "axios": "^1.6.8",
     "config": "^4.2.0",
     "pn-action-common": "file:../../functionsLib/actionCommon",
-    "uuid": "^9.0.1"
+    "uuid": "^14.0.0"
   }
 }
