@@ -6,5 +6,5 @@ import lombok.Getter;
 public enum CommunicationType {
 
     LEGAL,
-    INFORMAL;
+    INFORMAL
 }
