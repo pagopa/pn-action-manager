@@ -2,6 +2,7 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper;
 
 import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.dto.action.CommunicationType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity.ActionEntity;
 import it.pagopa.pn.actionmanager.service.mapper.SmartMapper;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class DtoToEntityActionMapperTest {
                 .type(ActionType.ANALOG_WORKFLOW)
                 .details("{\"key\":\"value\"}")
                 .timelineId("2021-09-16T15:24:00.00Z")
+                .communicationType(CommunicationType.INFORMAL)
                 .build();
 
         // Act
@@ -48,6 +50,7 @@ class DtoToEntityActionMapperTest {
         assertEquals(ActionType.ANALOG_WORKFLOW, actual.getType());
         assertEquals("2021-09-16T15:24:00.00Z", actual.getTimelineId());
         assertEquals(Map.of("key", "value"), actual.getDetails());
+        assertEquals(CommunicationType.INFORMAL, actual.getCommunicationType());
     }
 
     @Test
@@ -66,6 +69,7 @@ class DtoToEntityActionMapperTest {
                 .type(ActionType.ANALOG_WORKFLOW)
                 .timelineId("2021-09-16T15:24:00.00Z")
                 .details(null)
+                .communicationType(CommunicationType.INFORMAL)
                 .build();
 
         // Act
@@ -78,6 +82,7 @@ class DtoToEntityActionMapperTest {
         assertEquals(1, actual.getRecipientIndex());
         assertEquals(ActionType.ANALOG_WORKFLOW, actual.getType());
         assertEquals("2021-09-16T15:24:00.00Z", actual.getTimelineId());
+        assertEquals(CommunicationType.INFORMAL, actual.getCommunicationType());
         assertNull(actual.getDetails());
     }
 }

@@ -30,5 +30,7 @@ public class Action {
 
     private String timeslot;
 
+    private CommunicationType communicationType;
+
     private String details;
 }
