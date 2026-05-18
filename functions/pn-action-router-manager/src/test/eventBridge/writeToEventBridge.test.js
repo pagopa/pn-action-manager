@@ -122,7 +122,7 @@ describe("writeToEventBridge.writeMessagesToEventBridge", function () {
 
 		const actions = [
 			{ iun: "iun-1", type: "T1", details: {} },
-			{ iun: "iun-2", type: "T2", details: {} },
+			{ iun: "iun-2", type: "T2", details: {}, communicationType: "INFORMAL" },
 			{ iun: "iun-3", type: "T3", details: {} },
 		];
 
@@ -137,8 +137,28 @@ describe("writeToEventBridge.writeMessagesToEventBridge", function () {
 		expect(first).to.have.property("Entries");
 		expect(first.Entries).to.have.length(2);
 		expect(first.Entries[0].EventBusName).to.equal("test-bus");
+		const detail0 = JSON.parse(first.Entries[0].Detail);
+		expect(detail0).to.have.property("body");
+		expect(detail0.body).to.have.property("iun", "iun-1");
+		expect(detail0).to.have.property("routingActionType", "T1");
+		expect(detail0).to.not.have.property("communicationType");
+		expect(detail0.body).to.not.have.property("communicationType");
+		const detail1 = JSON.parse(first.Entries[1].Detail);
+		expect(detail1).to.have.property("body");
+		expect(detail1.body).to.have.property("iun", "iun-2");
+		expect(detail1).to.have.property("routingActionType", "T2");
+		expect(detail1).to.have.property("communicationType", "INFORMAL");
+		expect(detail1.body).to.have.property("communicationType", "INFORMAL");
+		expect(first.Entries[0].Detail).to.contain("iun-1");
 		expect(second.Entries).to.have.length(1);
 		expect(second.Entries[0].EventBusName).to.equal("test-bus");
+		const detail2 = JSON.parse(second.Entries[0].Detail);
+		expect(detail2).to.have.property("body");
+		expect(detail2.body).to.have.property("iun", "iun-3");
+		expect(detail2).to.have.property("routingActionType", "T3");
+		expect(detail2).to.not.have.property("communicationType");
+		expect(detail2.body).to.not.have.property("communicationType");
+		expect(second.Entries[0].Detail).to.contain("iun-3");
 	});
 
 	it("stops sending when time runs out and returns remaining actions", async () => {

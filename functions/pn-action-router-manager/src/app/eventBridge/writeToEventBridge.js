@@ -105,13 +105,19 @@ function mapActionToEventBridgeMessage(action) {
 
     console.log("copiedAction", JSON.stringify(copiedAction));
 
+    const messageDetail = {
+        body: copiedAction,
+        routingActionType: ActionUtils.getCompleteActionType(action?.type, action?.details)
+    }
+
+    if(copiedAction.communicationType) {
+      messageDetail.communicationType = copiedAction.communicationType;
+    }
+
     const message = {
       Source: "pn-action-manager",
       DetailType: "ActionManagerEventOutcome",
-      Detail: JSON.stringify({
-        body: copiedAction,
-        routingActionType: ActionUtils.getCompleteActionType(action?.type, action?.details)
-      })
+      Detail: JSON.stringify(messageDetail)
     };
     return message;
 }
