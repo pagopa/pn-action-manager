@@ -26,7 +26,8 @@ public class DtoToEntityActionMapper {
                 .type(dto.getType())
                 .timeslot(dto.getTimeslot())
                 .timelineId(dto.getTimelineId())
-                .iun(dto.getIun());
+                .iun(dto.getIun())
+                .communicationType(dto.getCommunicationType());
 
         if(StringUtils.hasText(dto.getDetails()))
             builder.details(dtoToDetailsEntity(dto.getDetails()));

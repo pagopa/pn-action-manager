@@ -112,7 +112,10 @@ describe("eventBridgeFunctions test", function () {
       Entries: [{ EventId: "1" }, { EventId: "2" }],
     });
 
-    const actions = [makeTestAction({ seqNo: 11 }), makeTestAction({ seqNo: 12 })];
+    const actions = [
+        makeTestAction({ seqNo: 11 }),
+        makeTestAction({ seqNo: 12, communicationType: 'INFORMAL' })
+    ];
 
     const result = await mod.putMessages([...actions], () => false);
 
@@ -124,6 +127,12 @@ describe("eventBridgeFunctions test", function () {
     expect(cmd.input).to.have.property("Entries");
     expect(cmd.input.Entries).to.have.length(2);
     expect(cmd.input.Entries[0]).to.have.property("EventBusName", "test-bus");
+    const detail0 = JSON.parse(cmd.input.Entries[0].Detail);
+    expect(detail0).to.not.have.property("communicationType");
+    expect(detail0.body).to.not.have.property("communicationType");
+    const detail1 = JSON.parse(cmd.input.Entries[1].Detail);
+    expect(detail1).to.have.property("communicationType", "INFORMAL");
+    expect(detail1.body).to.have.property("communicationType", "INFORMAL");
 
     expect(fakeActionUtils.getCompleteActionType.called).to.eq(true);
   });

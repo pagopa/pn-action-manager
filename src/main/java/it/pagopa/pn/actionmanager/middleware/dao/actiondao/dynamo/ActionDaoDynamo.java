@@ -3,6 +3,7 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo;
 import it.pagopa.pn.actionmanager.config.PnActionManagerConfigs;
 import it.pagopa.pn.actionmanager.dto.action.Action;
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.dto.action.CommunicationType;
 import it.pagopa.pn.actionmanager.exceptions.PnConflictException;
 import it.pagopa.pn.actionmanager.exceptions.PnNotFoundException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
@@ -89,6 +90,10 @@ public class ActionDaoDynamo implements ActionDao {
                 .addAttribute(Instant.class, a -> a.name(ActionEntity.FIELD_CREATED_AT)
                         .getter(ActionEntity::getCreatedAt)
                         .setter(ActionEntity::setCreatedAt)
+                )
+                .addAttribute(CommunicationType.class, a -> a.name(ActionEntity.FIELD_COMMUNICATION_TYPE)
+                        .getter(ActionEntity::getCommunicationType)
+                        .setter(ActionEntity::setCommunicationType)
                 )
                 .build();
 

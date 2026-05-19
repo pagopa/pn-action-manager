@@ -2,6 +2,7 @@ package it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.entity;
 
 
 import it.pagopa.pn.actionmanager.dto.action.ActionType;
+import it.pagopa.pn.actionmanager.dto.action.CommunicationType;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.dynamo.mapper.ActionDetailsConverter;
 import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
@@ -27,6 +28,7 @@ public class ActionEntity {
   public static final String FIELD_TTL = "ttl";
   public static final String FIELD_DETAILS = "details";
   public static final String FIELD_CREATED_AT = "createdAt";
+  public static final String FIELD_COMMUNICATION_TYPE = "communicationType";
 
   private String actionId;
   private String iun;
@@ -37,6 +39,7 @@ public class ActionEntity {
   private String timelineId;
   private Instant createdAt;
   private long ttl;
+  private CommunicationType communicationType;
   private Map<String,Object> details;
 
   @DynamoDbPartitionKey
