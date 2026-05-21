@@ -149,6 +149,7 @@ components:
         - NOTIFICATION_REWORK_VALIDATION
         - NOTIFICATION_REWORK_REQUESTED
         - NOTIFICATION_REWORK_UPDATE
+        - POST_VALIDATION_COMPLETED
 
     CommunicationType:
       type: string
