@@ -117,6 +117,8 @@ components:
         timelineId:
           type: string
           description: ID della timeline associata all'azione.
+        communicationType:
+          $ref: "#/components/schemas/CommunicationType"
         details:
           type: string
           description: Quando fornito deve essere un Json valido.
@@ -147,3 +149,11 @@ components:
         - NOTIFICATION_REWORK_VALIDATION
         - NOTIFICATION_REWORK_REQUESTED
         - NOTIFICATION_REWORK_UPDATE
+        - POST_VALIDATION_COMPLETED
+
+    CommunicationType:
+      type: string
+      description: Tipo di notifica alla quale si riferisce l'azione (influenza la destinazione dell'evento inviato dall'applicazione).
+      enum:
+        - LEGAL
+        - INFORMAL

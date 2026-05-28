@@ -22,7 +22,8 @@ public class EntityToDtoActionMapper {
                 .type(entity.getType())
                 .timeslot(entity.getTimeslot())
                 .timelineId(entity.getTimelineId())
-                .iun(entity.getIun());
+                .iun(entity.getIun())
+                .communicationType(entity.getCommunicationType());
 
         if(entity.getDetails() != null && !entity.getDetails().isEmpty()) {
             builder.details(entityDetailsToDto(entity.getDetails()));
