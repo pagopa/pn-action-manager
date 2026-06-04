@@ -9,5 +9,6 @@ public class PnActionManagerExceptionCodes extends PnExceptionsCodes {
     public static final String ERROR_CODE_ACTION_BAD_REQUEST = "PN_ACTIONMANAGER_ERROR_CODE_ACTION_BAD_REQUEST";
     public static final String ERROR_CODE_ACTION_CONFLICT = "PN_ACTIONMANAGER_ERROR_CODE_ACTION_CONFLICT";
     public static final String ERROR_CODE_ACTION_NOT_FOUND = "PN_ACTIONMANAGER_ERROR_CODE_ACTION_NOT_FOUND";
+    public static final String ERROR_CODE_INCOHERENT_COMMUNICATION_TYPE = "PN_ACTIONMANAGER_ERROR_CODE_INCOHERENT_COMMUNICATION_TYPE";
     public static final String ERROR_MESSAGE_INVALID_DETAILS_FIELD = "Invalid details field";
 }
