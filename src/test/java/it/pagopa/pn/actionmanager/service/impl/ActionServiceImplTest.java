@@ -7,6 +7,7 @@ import it.pagopa.pn.actionmanager.dto.action.ActionType;
 import it.pagopa.pn.actionmanager.exceptions.PnBadRequestException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
+import it.pagopa.pn.actionmanager.utils.CommunicationTypeChecker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,8 @@ class ActionServiceImplTest {
         PnActionManagerConfigs pnActionManagerConfigs = new PnActionManagerConfigs();
         pnActionManagerConfigs.setDetailsMaxSizeBytes(10000);
         pnActionManagerConfigs.setDetailsMaxDepth(5);
-        actionService = new ActionServiceImpl(actionDao, futureActionDao, pnActionManagerConfigs);
+        CommunicationTypeChecker communicationTypeChecker = Mockito.mock(CommunicationTypeChecker.class);
+        actionService = new ActionServiceImpl(actionDao, futureActionDao, pnActionManagerConfigs, communicationTypeChecker);
     }
 
     @Test

@@ -7,6 +7,7 @@ import it.pagopa.pn.actionmanager.exceptions.PnBadRequestException;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.ActionDao;
 import it.pagopa.pn.actionmanager.middleware.dao.actiondao.FutureActionDao;
 import it.pagopa.pn.actionmanager.service.ActionService;
+import it.pagopa.pn.actionmanager.utils.CommunicationTypeChecker;
 import it.pagopa.pn.actionmanager.utils.DetailsValidationUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class ActionServiceImpl implements ActionService {
     private final ActionDao actionDao;
     private final FutureActionDao futureActionDao;
     private final PnActionManagerConfigs pnActionManagerConfigs;
+    private final CommunicationTypeChecker communicationTypeChecker;
 
     @Override
     public Mono<Void> addOnlyActionIfAbsent(Action action) {
@@ -37,8 +39,10 @@ public class ActionServiceImpl implements ActionService {
                 .build();
         validateActionIdAndIun(action);
         DetailsValidationUtils.validateDetails(action.getDetails(), pnActionManagerConfigs.getDetailsMaxSizeBytes(), pnActionManagerConfigs.getDetailsMaxDepth());
+        communicationTypeChecker.checkAgainstIun(action.getCommunicationType(), action.getIun());
         return actionDao.addOnlyActionIfAbsent(action);
     }
+
     private String computeTimeSlot(Instant instant) {
         OffsetDateTime nowUtc = instant.atOffset(ZoneOffset.UTC);
         return String.format("%04d-%02d-%02dT%02d:%02d",
