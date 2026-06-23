@@ -100,6 +100,7 @@ function getFutureAction(action){
     iun: action.iun,
     details: action.details,
     createdAt: action.createdAt,
+    communicationType: action.communicationType,
     ttl: ttl
   };
 
