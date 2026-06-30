@@ -150,6 +150,10 @@ components:
         - NOTIFICATION_REWORK_REQUESTED
         - NOTIFICATION_REWORK_UPDATE
         - POST_VALIDATION_COMPLETED
+        - START_WORKFLOW
+        - TIMEOUT_WORKFLOW
+        - END_WORKFLOW
+        - WORKFLOW_DONE
 
     CommunicationType:
       type: string
