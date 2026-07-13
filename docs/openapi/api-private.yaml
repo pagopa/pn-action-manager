@@ -150,6 +150,7 @@ components:
         - NOTIFICATION_REWORK_REQUESTED
         - NOTIFICATION_REWORK_UPDATE
         - POST_VALIDATION_COMPLETED
+        - SEND_COURTESY_MESSAGE_ACTION
 
     CommunicationType:
       type: string
