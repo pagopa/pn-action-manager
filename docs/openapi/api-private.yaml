@@ -155,6 +155,7 @@ components:
         - TIMEOUT_WORKFLOW
         - END_WORKFLOW
         - WORKFLOW_DONE
+        - SEND_CHANNEL_MESSAGE
 
     CommunicationType:
       type: string
