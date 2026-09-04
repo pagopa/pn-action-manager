@@ -59,6 +59,8 @@ public enum ActionType {
 
     END_WORKFLOW,
 
-    WORKFLOW_DONE
+    WORKFLOW_DONE,
+
+    SEND_CHANNEL_MESSAGE
 
 }
