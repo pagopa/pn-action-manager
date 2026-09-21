@@ -259,6 +259,16 @@ Parameters:
     Description: 'Maximum age in seconds of a record that Lambda reads from Kinesis before being discarded and sent to the onFailure destination. Default is 7 days (604800 seconds)'
     Default: 604800 # 7 days in seconds
 
+  CpuArchitecture:
+    Type: String
+    Default: ARM
+    Description: CPU architecture for the Fargate tasks.
+
+  JavaToolOptions:
+    Type: String
+    Default: ''
+    Description: 'Java tool options for the Fargate tasks.'
+
 Resources:
   # PN-ActionManager microservice
   ActionManagerMsMicroservice:
@@ -300,6 +310,8 @@ Resources:
         WireTapLogActivation: !Ref WireTapLogActivation
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
         TaskRoleManagedPolicyArn: !Ref ActionManagerTaskManagedPolicy
+        CpuArchitecture: !Ref CpuArchitecture
+        JavaToolOptions: !Ref JavaToolOptions
 
   ActionManagerTaskManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
