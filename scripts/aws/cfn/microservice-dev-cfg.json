@@ -19,6 +19,7 @@
     "ActionLambdasEnabledStart": "1753173328000",
     "ActionLambdasEnabledEnd": "4087285200000",
     "PnCronAnalyzer": "-",
+    "LambdaRuntime": "nodejs24.x",
     "WireTapLogActivation": "false",
     "MountEfs": "false"
   }
